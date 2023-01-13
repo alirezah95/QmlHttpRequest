@@ -43,6 +43,7 @@ function(add_new_gtest testname)
             Qt${QT_VERSION_MAJOR}::Test
             gtest
             gmock
+            qmlHttpRequest
         )
         target_include_directories(${testname} PRIVATE ../src)
     else()
