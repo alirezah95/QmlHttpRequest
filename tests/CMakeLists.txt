@@ -56,6 +56,7 @@ set(MOCKS_HEADERS
 )
 
 set(TEST_FILES
+    tst_request.cpp
 )
 
 foreach(TEST_FILE IN LISTS TEST_FILES)
