@@ -3,6 +3,11 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+TEST(TestRequest, TestDefaultConstructedRequest)
+{
+    Request request;
+}
+
 
 int main(int argc, char* argv[])
 {
