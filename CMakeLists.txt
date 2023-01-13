@@ -24,3 +24,6 @@ else()
         Qt${QT_VERSION_MAJOR}::Qml
     )
 endif()
+
+# Add tests subdirectory
+add_subdirectory("tests/")
