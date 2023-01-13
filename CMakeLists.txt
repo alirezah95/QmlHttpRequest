@@ -14,6 +14,7 @@ else()
     include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
     add_library(${PROJECT_NAME} SHARED
+        src/qmlhttprequest_global.hpp
     )
 
     target_compile_definitions(${PROJECT_NAME} PRIVATE QMLHTTPREQUEST_LIBRARY)
