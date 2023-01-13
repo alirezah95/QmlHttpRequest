@@ -3,9 +3,12 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include "request.hpp"
+
 TEST(TestRequest, TestDefaultConstructedRequest)
 {
-    Request request;
+    qhr::Request request;
+    ASSERT_FALSE(request.isOpen());
 }
 
 
