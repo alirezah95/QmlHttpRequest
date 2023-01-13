@@ -15,6 +15,7 @@ else()
 
     add_library(${PROJECT_NAME} SHARED
         src/qmlhttprequest_global.hpp
+        src/request.hpp src/request.cpp
     )
 
     target_compile_definitions(${PROJECT_NAME} PRIVATE QMLHTTPREQUEST_LIBRARY)
