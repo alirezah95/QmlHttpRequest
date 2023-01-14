@@ -38,6 +38,11 @@ namespace qhr {
 class QHR_EXPORT Request : public QObject
 {
     Q_OBJECT
+    // Response properties
+    Q_PROPERTY(int      status          READ replyStatus        CONSTANT)
+    Q_PROPERTY(QString  statusText      READ replyStatusText    CONSTANT)
+    Q_PROPERTY(QString  responseText    READ replyResponseText  CONSTANT)
+    // Request properties
     Q_PROPERTY(int timeout READ timeout WRITE setTimeout)
     Q_PROPERTY(QJSValue onDownloadProgressChanged   MEMBER mDownloadProgressChangedCallback)
     Q_PROPERTY(QJSValue onUploadProgressChanged     MEMBER mUploadProgressChangedCallback)
@@ -79,6 +84,10 @@ public:
 
     void setTimeout(int timeout);
     int timeout() const { return mNRequest.transferTimeout(); }
+
+    int replyStatus() const;
+    QString replyStatusText() const;
+    QString replyResponseText() const;
 
 private:
     QNetworkReply* sendNoBodyRequest();

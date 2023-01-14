@@ -138,6 +138,39 @@ void Request::setTimeout(int timeout)
     mNRequest.setTransferTimeout(timeout);
 }
 
+int Request::replyStatus() const
+{
+    if (mNReply->isFinished()) {
+        QVariant status
+            = mNReply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+        if (status.isValid()) {
+            return status.toInt();
+        }
+    }
+    return 0;
+}
+
+QString Request::replyStatusText() const
+{
+    if (mNReply->isFinished()) {
+        QVariant statusText
+            = mNReply->attribute(QNetworkRequest::HttpReasonPhraseAttribute);
+
+        if (statusText.isValid()) {
+            return statusText.toString();
+        }
+    }
+    return QString();
+}
+
+QString Request::replyResponseText() const
+{
+    if (mNReply->isFinished()) {
+        return mNReply->readAll();
+    }
+    return QString();
+}
+
 /*!
  * \brief Request::sendNoBodyRequest() This method is used by \ref
  * Request::send() method to send a request that doesn't need a body, like GET,
@@ -228,21 +261,19 @@ QNetworkReply* Request::sendBodyRequestMultipart(const QVariant& body)
  */
 void Request::setupReplyConnections()
 {
-    connect(mNReply, &QNetworkReply::finished, this,
-            &Request::onReplyFinished);
+    connect(mNReply, &QNetworkReply::finished, this, &Request::onReplyFinished);
 
     connect(mNReply, &QNetworkReply::errorOccurred, this,
-            &Request::onReplyErrorOccured);
+        &Request::onReplyErrorOccured);
 
-    connect(mNReply, &QNetworkReply::redirected, this,
-            &Request::onReplyRedirected);
+    connect(
+        mNReply, &QNetworkReply::redirected, this, &Request::onReplyRedirected);
 
     connect(mNReply, &QNetworkReply::downloadProgress, this,
-            &Request::onReplyDownloadProgress);
+        &Request::onReplyDownloadProgress);
 
     connect(mNReply, &QNetworkReply::uploadProgress, this,
-            &Request::onReplyUploadProgress);
-
+        &Request::onReplyUploadProgress);
 }
 
 void Request::onReplyFinished()
