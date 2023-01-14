@@ -26,6 +26,12 @@ TEST_F(TestRequest, TestDefaultConstructedRequest)
     ASSERT_FALSE(request.isOpen());
 }
 
+TEST_F(TestRequest, TestOpenMethod)
+{
+    request.open("GET", QUrl("https://fake.com"));
+    ASSERT_TRUE(request.isOpen());
+}
+
 
 int main(int argc, char* argv[])
 {
