@@ -30,6 +30,17 @@ Request::Request(QNetworkAccessManagerPtr nam, int timeout, QObject* parent)
     }
 }
 
+Request::~Request()
+{
+    if (mNReply) {
+        if (mNReply->isRunning()) {
+            mNReply->abort();
+        }
+
+        mNReply->deleteLater();
+    }
+}
+
 /*!
  * \qmlmethod open()
  * \brief Request::open() Opens a request with the \a method as method name and

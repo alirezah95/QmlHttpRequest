@@ -69,6 +69,7 @@ public:
 
     explicit Request(QObject* parent = nullptr);
     Request(QNetworkAccessManagerPtr nam, int timeout = 0, QObject* parent = nullptr);
+    virtual ~Request();
 
     Q_INVOKABLE bool isOpen() const
     {
