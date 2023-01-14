@@ -21,7 +21,7 @@ TEST_F(TestQmlHttpRequest, TestDefaultTimeout)
 {
     qhr.setDefaultTimeout(3000);
     auto request = qhr.newRequest();
-    ASSERT_EQ(request.timeout());
+    ASSERT_EQ(request->timeout(), 3000);
 }
 
 int main(int argc, char* argv[])
