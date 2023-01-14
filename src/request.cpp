@@ -159,7 +159,7 @@ void Request::sendNoBodyRequest()
  * to perform sending a request that needs (has) a body
  * \param body
  */
-void Request::sendBodyRequest(QVariant body)
+void Request::sendBodyRequest(const QVariant& body)
 {
     if (mNam) {
         QNetworkReply* reply;
@@ -190,5 +190,23 @@ void Request::sendBodyRequest(QVariant body)
         }
     }
 }
+
+/*!
+ * \brief Request::sendBodyRequestText() This method should be used when the
+ * content-type of this request is text type, like \a application/json,
+ * text/plain, etc
+ * \param body The body to be sent with this request. The \a body will be
+ * converted to \a\b QByteArray
+ */
+void Request::sendBodyRequestText(const QVariant& body) { }
+
+/*!
+ * \brief Request::sendBodyRequestMultipart() This method should be used when
+ * the content-type of this request is multipart type, like \a
+ * multipart/form-data, etc
+ * \param body The body to be sent the request. It will be converted to a \a\b
+ * QHttpMultiPart data
+ */
+void Request::sendBodyRequestMultipart(const QVariant& body) { }
 
 }

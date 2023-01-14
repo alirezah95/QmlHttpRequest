@@ -81,7 +81,10 @@ public:
 
 private:
     void sendNoBodyRequest();
-    void sendBodyRequest(QVariant body);
+    void sendBodyRequest(const QVariant& body);
+
+    void sendBodyRequestText(const QVariant& body);
+    void sendBodyRequestMultipart(const QVariant& body);
 
 private:
     QNetworkAccessManagerPtr mNam;
