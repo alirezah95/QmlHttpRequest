@@ -9,7 +9,10 @@ namespace qhr {
  * can be used in QML to create a new \ref Request
  */
 
-QmlHttpRequest::QmlHttpRequest(QObject* parent) : QObject { parent } { }
+QmlHttpRequest::QmlHttpRequest(QObject* parent)
+    : QObject { parent },
+      mNam(new QNetworkAccessManager(this))
+{ }
 
 /*!
  * \brief QmlHttpRequest::newRequest() Creates a new \ref Request object that
