@@ -1,4 +1,5 @@
 #include "qmlhttprequest.hpp"
+#include "request.hpp"
 
 namespace qhr {
 
@@ -9,5 +10,10 @@ namespace qhr {
  */
 
 QmlHttpRequest::QmlHttpRequest(QObject* parent) : QObject { parent } { }
+
+Request* QmlHttpRequest::newRequest()
+{
+    return new Request(nullptr, this);
+}
 
 }

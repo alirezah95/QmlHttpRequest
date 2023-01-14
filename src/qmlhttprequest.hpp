@@ -28,12 +28,15 @@
 
 namespace qhr {
 
+class Request;
+
 class QmlHttpRequest : public QObject
 {
     Q_OBJECT
 public:
     explicit QmlHttpRequest(QObject* parent = nullptr);
 
+    Q_INVOKABLE qhr::Request* newRequest();
 };
 
 }
