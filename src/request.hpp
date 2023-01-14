@@ -28,9 +28,9 @@
 
 #include "qmlhttprequest_global.hpp"
 
-namespace qhr {
-
 class QNetworkAccessManager;
+
+namespace qhr {
 
 class QHR_EXPORT Request : public QObject
 {
