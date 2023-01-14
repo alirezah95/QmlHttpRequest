@@ -12,7 +12,13 @@ namespace qhr {
  * XmlHttpRequest
  */
 
-Request::Request(QObject* parent) : QObject { parent } { }
+Request::Request(QObject* parent) : QObject { parent }, mNam(nullptr) { }
+
+Request::Request(QNetworkAccessManager* nam, QObject* parent)
+    : Request(parent)
+{
+    mNam = nam;
+}
 
 /*!
  * \qmlmethod open()
@@ -51,6 +57,11 @@ void Request::setRequestHeader(const QString& header, const QString& value)
 QByteArray Request::requestHeader(const QByteArray& header) const
 {
     return mNRequest.rawHeader(header);
+}
+
+void Request::setNetworkAccessManager(QNetworkAccessManager* nam)
+{
+    mNam = nam;
 }
 
 }

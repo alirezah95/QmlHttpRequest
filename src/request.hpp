@@ -30,11 +30,14 @@
 
 namespace qhr {
 
+class QNetworkAccessManager;
+
 class QHR_EXPORT Request : public QObject
 {
     Q_OBJECT
 public:
     explicit Request(QObject* parent = nullptr);
+    Request(QNetworkAccessManager* nam, QObject* parent = nullptr);
 
     Q_INVOKABLE bool isOpen() const
     {
@@ -46,9 +49,12 @@ public:
 
     QByteArray requestHeader(const QByteArray& header) const;
 
-private:
-    QNetworkRequest mNRequest;
+    void setNetworkAccessManager(QNetworkAccessManager* nam);
+    auto networkAccessManager() const { return mNam; }
 
+private:
+    QNetworkAccessManager* mNam;
+    QNetworkRequest mNRequest;
     QString mMethodName;
 };
 
