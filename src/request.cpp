@@ -234,6 +234,7 @@ void Request::sendBodyRequest(const QVariant& body)
 
             if (contentType.startsWith("application/")
                 || contentType.startsWith("text/")) {
+                sendBodyRequestText(body);
             } else if (contentType.startsWith("multipart/")) {
                 sendBodyRequestMultipart(body);
             }
@@ -258,6 +259,8 @@ void Request::sendBodyRequest(const QVariant& body)
  */
 void Request::sendBodyRequestText(const QVariant& body)
 {
+    mNReply
+        = mNam->sendCustomRequest(mNRequest, mMethodName, body.toByteArray());
     return;
 }
 
