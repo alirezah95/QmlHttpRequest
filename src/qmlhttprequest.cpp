@@ -12,7 +12,9 @@ namespace qhr {
 QmlHttpRequest::QmlHttpRequest(QObject* parent)
     : QObject { parent },
       mNam(new QNetworkAccessManager())
-{ }
+{
+    setRedirectPolicy(RedirectPolicy::NoLessSafeRedirectPolicy);
+}
 
 /*!
  * \brief QmlHttpRequest::newRequest() Creates a new \ref Request object that
