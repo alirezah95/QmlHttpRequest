@@ -26,6 +26,11 @@ Request* QmlHttpRequest::newRequest()
     return new Request(mNam, mNam->transferTimeout(), this);
 }
 
+/*!
+ * \brief QmlHttpRequest::setDefaultTimeout() Set the default timeout for all
+ * requests created using this class. Zero means no timeout.
+ * \param timeout Time out in milliseconds
+ */
 void QmlHttpRequest::setDefaultTimeout(int timeout)
 {
     mNam->setTransferTimeout(timeout);
