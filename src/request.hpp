@@ -27,6 +27,7 @@
 #include <QNetworkRequest>
 #include <QSharedPointer>
 #include <QJSValue>
+#include <QQmlEngine>
 
 #include "qmlhttprequest_global.hpp"
 
@@ -38,6 +39,7 @@ namespace qhr {
 class QHR_EXPORT Request : public QObject
 {
     Q_OBJECT
+    QML_ELEMENT
     // Response properties
     Q_PROPERTY(int      status          READ replyStatus        CONSTANT)
     Q_PROPERTY(QString  statusText      READ replyStatusText    CONSTANT)

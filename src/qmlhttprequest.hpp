@@ -25,6 +25,7 @@
 
 #include <QNetworkAccessManager>
 #include <QSharedPointer>
+#include <QQmlEngine>
 #include <QObject>
 
 namespace qhr {
@@ -34,6 +35,7 @@ class Request;
 class QmlHttpRequest : public QObject
 {
     Q_OBJECT
+    QML_ELEMENT
     Q_PROPERTY(RedirectPolicy redirectPolicy READ redirectPolicy WRITE setRedirectPolicy)
 
     using QNetworkAccessManagerPtr = QSharedPointer<QNetworkAccessManager>;
