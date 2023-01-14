@@ -1,6 +1,7 @@
 #include "request.hpp"
 
 #include <QNetworkAccessManager>
+#include <QNetworkReply>
 
 namespace qhr {
 
@@ -16,7 +17,7 @@ namespace qhr {
 
 Request::Request(QObject* parent)
     : QObject { parent }, mNam(QNetworkAccessManagerPtr()), mMethodName(""),
-      mMethod(Method::INVALID)
+      mMethod(Method::INVALID), mNReply(nullptr)
 {
 }
 
@@ -83,12 +84,14 @@ void Request::setRequestHeader(const QString& header, const QString& value)
 void Request::send(QVariant body)
 {
     if (isOpen() && mNam) {
+        QNetworkReply* reply = nullptr;
+
         switch (mMethod) {
         case Method::INVALID:
             return;
         case Method::GET:
         case Method::HEAD:
-            sendNoBodyRequest();
+            reply = sendNoBodyRequest();
             break;
         case Method::POST:
         case Method::PUT:
@@ -103,6 +106,8 @@ void Request::send(QVariant body)
                 sendBodyRequest(body);
             }
         }
+
+        // Connect to signals of QNetworkReply
     }
 }
 
@@ -139,19 +144,20 @@ void Request::setTimeout(int timeout)
  */
 QNetworkReply* Request::sendNoBodyRequest()
 {
+    QNetworkReply* reply = nullptr;
+
     if (mNam) {
-        QNetworkReply* reply;
         switch (mMethod) {
         case Method::GET:
         case Method::HEAD:
             reply = mNam->sendCustomRequest(mNRequest, mMethodName);
             break;
         default:
-            return nullptr;
+            break;
         }
-
-        // Connect to signals of QNetworkReply
     }
+
+    return reply;
 }
 
 /*!
@@ -213,6 +219,34 @@ QNetworkReply* Request::sendBodyRequestText(const QVariant& body)
 QNetworkReply* Request::sendBodyRequestMultipart(const QVariant& body)
 {
     return nullptr;
+}
+
+/*!
+ * \brief Request::setupReplyConnections() Set up required connections for \a\b
+ * QNetworkReply to call related callbacks if they exist.
+ */
+void Request::setupReplyConnections()
+{
+    connect(mNReply, &QNetworkReply::finished, this, [&]() {
+        // If time out is reached only call timeout callback
+        if (mNReply->error() == QNetworkReply::TimeoutError) {
+            if (mTimeoutCallback.isCallable()) {
+                mTimeoutCallback.call();
+            }
+            return;
+        }
+
+        // If operation was aborted
+        if (mNReply->error() == QNetworkReply::OperationCanceledError) {
+            if (mAbortedCallback.isCallable()) {
+                mAbortedCallback.call();
+            }
+        }
+
+        if (mFinishedCallback.isCallable()) {
+            mFinishedCallback.call();
+        }
+    });
 }
 
 }
