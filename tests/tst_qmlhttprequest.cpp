@@ -1,8 +1,13 @@
 #include <QTest>
 
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
+class TestQmlHttpRequest : public ::testing::Test
+{
+public:
+    QmlHttpRequest qhr;
+};
 
 int main(int argc, char* argv[])
 {
