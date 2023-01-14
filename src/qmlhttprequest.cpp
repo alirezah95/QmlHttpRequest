@@ -11,9 +11,16 @@ namespace qhr {
 
 QmlHttpRequest::QmlHttpRequest(QObject* parent) : QObject { parent } { }
 
+/*!
+ * \brief QmlHttpRequest::newRequest() Creates a new \ref Request object that
+ * can be used to make HTTP request.
+ * \note This \ref Request object should be deleted when done with using \ref
+ * Request::destroy() from QML or \a\b Request::deleteLater()
+ * \return A \ref Request
+ */
 Request* QmlHttpRequest::newRequest()
 {
-    return new Request(nullptr, this);
+    return new Request(mNam, this);
 }
 
 }

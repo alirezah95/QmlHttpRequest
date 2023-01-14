@@ -24,6 +24,7 @@
 #define QMLHTTPREQUEST_HPP
 
 #include <QNetworkAccessManager>
+#include <QSharedPointer>
 #include <QObject>
 
 namespace qhr {
@@ -33,10 +34,15 @@ class Request;
 class QmlHttpRequest : public QObject
 {
     Q_OBJECT
+
+    using QNetworkAccessManagerPtr = QSharedPointer<QNetworkAccessManager>;
 public:
     explicit QmlHttpRequest(QObject* parent = nullptr);
 
     Q_INVOKABLE qhr::Request* newRequest();
+
+private:
+    QNetworkAccessManagerPtr mNam;
 };
 
 }
