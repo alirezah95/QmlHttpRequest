@@ -18,7 +18,7 @@ Request::Request(QObject* parent)
       mMethod(Method::INVALID)
 { }
 
-Request::Request(QNetworkAccessManager* nam, QObject* parent)
+Request::Request(QNetworkAccessManagerPtr nam, QObject* parent)
     : Request(parent)
 {
     mNam = nam;
@@ -111,7 +111,7 @@ QByteArray Request::requestHeader(const QByteArray& header) const
     return mNRequest.rawHeader(header);
 }
 
-void Request::setNetworkAccessManager(QNetworkAccessManager* nam)
+void Request::setNetworkAccessManager(QNetworkAccessManagerPtr nam)
 {
     mNam = nam;
 }

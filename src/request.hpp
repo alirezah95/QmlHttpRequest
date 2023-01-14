@@ -25,6 +25,7 @@
 
 #include <QObject>
 #include <QNetworkRequest>
+#include <QSharedPointer>
 
 #include "qmlhttprequest_global.hpp"
 
@@ -35,6 +36,8 @@ namespace qhr {
 class QHR_EXPORT Request : public QObject
 {
     Q_OBJECT
+
+    using QNetworkAccessManagerPtr = QSharedPointer<QNetworkAccessManager>;
 public:
     enum class Method: char {
         INVALID = -1,
@@ -48,7 +51,7 @@ public:
     };
 
     explicit Request(QObject* parent = nullptr);
-    Request(QNetworkAccessManager* nam, QObject* parent = nullptr);
+    Request(QNetworkAccessManagerPtr nam, QObject* parent = nullptr);
 
     Q_INVOKABLE bool isOpen() const
     {
@@ -61,7 +64,7 @@ public:
 
     QByteArray requestHeader(const QByteArray& header) const;
 
-    void setNetworkAccessManager(QNetworkAccessManager* nam);
+    void setNetworkAccessManager(QNetworkAccessManagerPtr nam);
     auto networkAccessManager() const { return mNam; }
 
 private:
@@ -69,7 +72,7 @@ private:
     void sendBodyRequest(QVariant body);
 
 private:
-    QNetworkAccessManager* mNam;
+    QNetworkAccessManagerPtr mNam;
     QNetworkRequest mNRequest;
     Method mMethod;
 };
