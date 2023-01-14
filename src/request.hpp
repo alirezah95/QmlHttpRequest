@@ -65,6 +65,10 @@ public:
     auto networkAccessManager() const { return mNam; }
 
 private:
+    void sendNoBodyRequest();
+    void sendBodyRequest(QVariant body);
+
+private:
     QNetworkAccessManager* mNam;
     QNetworkRequest mNRequest;
     Method mMethod;

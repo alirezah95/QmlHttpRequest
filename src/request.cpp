@@ -82,12 +82,20 @@ void Request::send(QVariant body)
             return;
         case Method::GET:
         case Method::HEAD:
+            sendNoBodyRequest();
+            break;
         case Method::POST:
         case Method::PUT:
         case Method::PATCH:
         case Method::DELETE:
-        case Method::CUSTOM:
+            sendBodyRequest(body);
             break;
+        case Method::CUSTOM:
+            if (body.isNull() || !body.isValid()) {
+                sendNoBodyRequest();
+            } else {
+                sendBodyRequest(body);
+            }
         }
     }
 }
@@ -106,6 +114,16 @@ QByteArray Request::requestHeader(const QByteArray& header) const
 void Request::setNetworkAccessManager(QNetworkAccessManager* nam)
 {
     mNam = nam;
+}
+
+void Request::sendNoBodyRequest()
+{
+
+}
+
+void Request::sendBodyRequest(QVariant body)
+{
+
 }
 
 }
