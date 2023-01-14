@@ -92,7 +92,7 @@ void Request::setRequestHeader(const QString& header, const QString& value)
  * \param body Optional parameter for making a send request. If method is GET or
  * HEAD body is ignored
  */
-void Request::send(QVariant body)
+void Request::send(const QVariant& body)
 {
     if (isOpen() && mNam) {
         switch (mMethod) {

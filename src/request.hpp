@@ -78,7 +78,7 @@ public:
 
     Q_INVOKABLE void open(const QString& method, const QUrl& url);
     Q_INVOKABLE void setRequestHeader(const QString& header, const QString& value);
-    Q_INVOKABLE void send(QVariant body = QVariant());
+    Q_INVOKABLE void send(const QVariant& body = QVariant());
 
     QByteArray requestHeader(const QByteArray& header) const;
 
