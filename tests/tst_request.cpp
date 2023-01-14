@@ -5,9 +5,24 @@
 
 #include "request.hpp"
 
-TEST(TestRequest, TestDefaultConstructedRequest)
+class TestRequest : public ::testing::Test
 {
+public:
+    void SetUp() override
+    {
+
+    }
+
+    void TearDown() override
+    {
+
+    }
+
     qhr::Request request;
+};
+
+TEST_F(TestRequest, TestDefaultConstructedRequest)
+{
     ASSERT_FALSE(request.isOpen());
 }
 
