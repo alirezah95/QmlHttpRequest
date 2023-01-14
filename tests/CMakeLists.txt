@@ -1,4 +1,4 @@
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Test)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Network Test)
 
 #if (WIN32)
 #    if (NOT EXISTS ${CMAKE_SOURCE_DIR}/tests/googletest/.git)
@@ -41,6 +41,7 @@ function(add_new_gtest testname)
         target_link_libraries(${testname} PRIVATE
             Qt${QT_VERSION_MAJOR}::Core
             Qt${QT_VERSION_MAJOR}::Test
+            Qt${QT_VERSION_MAJOR}::Network
             gtest
             gmock
             qmlHttpRequest
