@@ -1,5 +1,9 @@
 #include "request.hpp"
 
+#include <QFile>
+#include <QHttpMultiPart>
+#include <QHttpPart>
+#include <QMimeDatabase>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 
@@ -229,6 +233,7 @@ void Request::sendBodyRequest(const QVariant& body)
             if (contentType.startsWith("application/")
                 || contentType.startsWith("text/")) {
             } else if (contentType.startsWith("multipart/")) {
+                sendBodyRequestMultipart(body);
             }
             break;
         }
@@ -259,6 +264,61 @@ void Request::sendBodyRequestText(const QVariant& body)
  */
 void Request::sendBodyRequestMultipart(const QVariant& body)
 {
+    // Setting up the QHttpMultiPart body
+    QHttpMultiPart* mpBody = new QHttpMultiPart(QHttpMultiPart::FormDataType);
+
+    const auto& bodyMap = body.toMap();
+    if (!bodyMap.isEmpty()) {
+        for (auto it = bodyMap.constKeyValueBegin();
+             it != bodyMap.constKeyValueEnd(); ++it) {
+            QHttpPart part;
+
+            QUrl url = it->second.toUrl();
+            if (url.isValid() && url.isLocalFile()) {
+                // Open file and set it to QHttpPart
+                QFile* file = new QFile(url.toLocalFile());
+                if (!file->exists() || !file->open(QFile::ReadOnly)) {
+                    qWarning() << "Cannot open file: " << url;
+                    continue;
+                }
+
+                auto mimeType = QMimeDatabase().mimeTypeForData(file);
+
+                part.setHeader(
+                    QNetworkRequest::ContentTypeHeader, mimeType.name());
+                part.setHeader(QNetworkRequest::ContentDispositionHeader,
+                    QString("form-data; name=\"" + it->first
+                        + "\"; filename=\"%1\"")
+                        .arg(file->fileName()));
+                part.setBodyDevice(file);
+
+                // Set file parent to mpBody so it deleted automatically
+                file->setParent(mpBody);
+            } else {
+                part.setHeader(
+                    QNetworkRequest::ContentTypeHeader, QVariant("text/plain"));
+                part.setHeader(QNetworkRequest::ContentDispositionHeader,
+                    QString("form-data; name=\"") + it->first + "\"");
+                part.setBody(it->second.toByteArray());
+            }
+
+            // Append new part to multi part body
+            mpBody->append(part);
+        }
+    }
+
+    /*!
+     * \internal
+     * \warning Multipart form-data content type needs a boundary so it is
+     * essential to update the boundary of this content type with the
+     * boundary of \a\b QHttpMultiPart
+     */
+    mNRequest.setHeader(QNetworkRequest::ContentTypeHeader,
+        QString("multipart/form-data; boundary=" + mpBody->boundary()));
+
+    // Send multipart data request
+    mNReply = mNam->sendCustomRequest(mNRequest, mMethodName, mpBody);
+    mpBody->setParent(mNReply);
     return;
 }
 
