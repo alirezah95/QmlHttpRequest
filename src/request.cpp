@@ -100,19 +100,19 @@ void Request::send(const QVariant& body)
             return;
         case Method::GET:
         case Method::HEAD:
-            mNReply = sendNoBodyRequest();
+            sendNoBodyRequest();
             break;
         case Method::POST:
         case Method::PUT:
         case Method::PATCH:
         case Method::DELETE:
-            mNReply = sendBodyRequest(body);
+            sendBodyRequest(body);
             break;
         case Method::CUSTOM:
             if (body.isNull() || !body.isValid()) {
-                mNReply = sendNoBodyRequest();
+                sendNoBodyRequest();
             } else {
-                mNReply = sendBodyRequest(body);
+                sendBodyRequest(body);
             }
         }
 
@@ -187,22 +187,18 @@ QString Request::replyResponseText() const
  * Request::send() method to send a request that doesn't need a body, like GET,
  * HEAD, etc
  */
-QNetworkReply* Request::sendNoBodyRequest()
+void Request::sendNoBodyRequest()
 {
-    QNetworkReply* reply = nullptr;
-
     if (mNam) {
         switch (mMethod) {
         case Method::GET:
         case Method::HEAD:
-            reply = mNam->sendCustomRequest(mNRequest, mMethodName);
+            mNReply = mNam->sendCustomRequest(mNRequest, mMethodName);
             break;
         default:
             break;
         }
     }
-
-    return reply;
 }
 
 /*!
@@ -210,7 +206,7 @@ QNetworkReply* Request::sendNoBodyRequest()
  * to perform sending a request that needs (has) a body
  * \param body
  */
-QNetworkReply* Request::sendBodyRequest(const QVariant& body)
+void Request::sendBodyRequest(const QVariant& body)
 {
     if (mNam) {
         QNetworkReply* reply;
@@ -237,7 +233,7 @@ QNetworkReply* Request::sendBodyRequest(const QVariant& body)
             break;
         }
         default:
-            return nullptr;
+            break;
         }
     }
 }
@@ -249,9 +245,9 @@ QNetworkReply* Request::sendBodyRequest(const QVariant& body)
  * \param body The body to be sent with this request. The \a body will be
  * converted to \a\b QByteArray
  */
-QNetworkReply* Request::sendBodyRequestText(const QVariant& body)
+void Request::sendBodyRequestText(const QVariant& body)
 {
-    return nullptr;
+    return;
 }
 
 /*!
@@ -261,9 +257,9 @@ QNetworkReply* Request::sendBodyRequestText(const QVariant& body)
  * \param body The body to be sent the request. It will be converted to a \a\b
  * QHttpMultiPart data
  */
-QNetworkReply* Request::sendBodyRequestMultipart(const QVariant& body)
+void Request::sendBodyRequestMultipart(const QVariant& body)
 {
-    return nullptr;
+    return;
 }
 
 /*!

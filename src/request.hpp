@@ -93,11 +93,11 @@ public:
     QString replyResponseText() const;
 
 private:
-    QNetworkReply* sendNoBodyRequest();
-    QNetworkReply* sendBodyRequest(const QVariant& body);
+    void sendNoBodyRequest();
+    void sendBodyRequest(const QVariant& body);
 
-    QNetworkReply* sendBodyRequestText(const QVariant& body);
-    QNetworkReply* sendBodyRequestMultipart(const QVariant& body);
+    void sendBodyRequestText(const QVariant& body);
+    void sendBodyRequestMultipart(const QVariant& body);
 
     void setupReplyConnections();
 
