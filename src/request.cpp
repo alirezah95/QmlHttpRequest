@@ -202,6 +202,10 @@ void Request::sendNoBodyRequest()
         default:
             break;
         }
+
+        if (mNReply) {
+            setupReplyConnections();
+        }
     }
 }
 
@@ -213,8 +217,6 @@ void Request::sendNoBodyRequest()
 void Request::sendBodyRequest(const QVariant& body)
 {
     if (mNam) {
-        QNetworkReply* reply;
-
         switch (mMethod) {
         case Method::POST:
         case Method::PUT:
@@ -239,6 +241,10 @@ void Request::sendBodyRequest(const QVariant& body)
         }
         default:
             break;
+        }
+
+        if (mNReply) {
+            setupReplyConnections();
         }
     }
 }
