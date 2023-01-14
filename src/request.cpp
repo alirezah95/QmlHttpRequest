@@ -84,30 +84,31 @@ void Request::setRequestHeader(const QString& header, const QString& value)
 void Request::send(QVariant body)
 {
     if (isOpen() && mNam) {
-        QNetworkReply* reply = nullptr;
-
         switch (mMethod) {
         case Method::INVALID:
             return;
         case Method::GET:
         case Method::HEAD:
-            reply = sendNoBodyRequest();
+            mNReply = sendNoBodyRequest();
             break;
         case Method::POST:
         case Method::PUT:
         case Method::PATCH:
         case Method::DELETE:
-            sendBodyRequest(body);
+            mNReply = sendBodyRequest(body);
             break;
         case Method::CUSTOM:
             if (body.isNull() || !body.isValid()) {
-                sendNoBodyRequest();
+                mNReply = sendNoBodyRequest();
             } else {
-                sendBodyRequest(body);
+                mNReply = sendBodyRequest(body);
             }
         }
 
         // Connect to signals of QNetworkReply
+        if (mNReply) {
+            setupReplyConnections();
+        }
     }
 }
 
