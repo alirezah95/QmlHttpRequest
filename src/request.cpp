@@ -137,7 +137,7 @@ void Request::setTimeout(int timeout)
  * Request::send() method to send a request that doesn't need a body, like GET,
  * HEAD, etc
  */
-void Request::sendNoBodyRequest()
+QNetworkReply* Request::sendNoBodyRequest()
 {
     if (mNam) {
         QNetworkReply* reply;
@@ -147,7 +147,7 @@ void Request::sendNoBodyRequest()
             reply = mNam->sendCustomRequest(mNRequest, mMethodName);
             break;
         default:
-            return;
+            return nullptr;
         }
 
         // Connect to signals of QNetworkReply
@@ -159,7 +159,7 @@ void Request::sendNoBodyRequest()
  * to perform sending a request that needs (has) a body
  * \param body
  */
-void Request::sendBodyRequest(const QVariant& body)
+QNetworkReply* Request::sendBodyRequest(const QVariant& body)
 {
     if (mNam) {
         QNetworkReply* reply;
@@ -186,7 +186,7 @@ void Request::sendBodyRequest(const QVariant& body)
             break;
         }
         default:
-            return;
+            return nullptr;
         }
     }
 }
@@ -198,7 +198,10 @@ void Request::sendBodyRequest(const QVariant& body)
  * \param body The body to be sent with this request. The \a body will be
  * converted to \a\b QByteArray
  */
-void Request::sendBodyRequestText(const QVariant& body) { }
+QNetworkReply* Request::sendBodyRequestText(const QVariant& body)
+{
+    return nullptr;
+}
 
 /*!
  * \brief Request::sendBodyRequestMultipart() This method should be used when
@@ -207,6 +210,9 @@ void Request::sendBodyRequestText(const QVariant& body) { }
  * \param body The body to be sent the request. It will be converted to a \a\b
  * QHttpMultiPart data
  */
-void Request::sendBodyRequestMultipart(const QVariant& body) { }
+QNetworkReply* Request::sendBodyRequestMultipart(const QVariant& body)
+{
+    return nullptr;
+}
 
 }

@@ -31,6 +31,7 @@
 #include "qmlhttprequest_global.hpp"
 
 class QNetworkAccessManager;
+class QNetworkReply;
 
 namespace qhr {
 
@@ -80,11 +81,11 @@ public:
     int timeout() const { return mNRequest.transferTimeout(); }
 
 private:
-    void sendNoBodyRequest();
-    void sendBodyRequest(const QVariant& body);
+    QNetworkReply* sendNoBodyRequest();
+    QNetworkReply* sendBodyRequest(const QVariant& body);
 
-    void sendBodyRequestText(const QVariant& body);
-    void sendBodyRequestMultipart(const QVariant& body);
+    QNetworkReply* sendBodyRequestText(const QVariant& body);
+    QNetworkReply* sendBodyRequestMultipart(const QVariant& body);
 
 private:
     QNetworkAccessManagerPtr mNam;
