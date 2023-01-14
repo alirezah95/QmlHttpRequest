@@ -86,6 +86,7 @@ private:
 private:
     QNetworkAccessManagerPtr mNam;
     QNetworkRequest mNRequest;
+    QByteArray mMethodName;
     Method mMethod;
 
     QJSValue downloadProgressChangedCallback;
