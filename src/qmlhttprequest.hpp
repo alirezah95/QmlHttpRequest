@@ -34,7 +34,7 @@ class Request;
 class QmlHttpRequest : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(int redirectPolicy READ redirectPolicy WRITE setRedirectPolicy)
+    Q_PROPERTY(RedirectPolicy redirectPolicy READ redirectPolicy WRITE setRedirectPolicy)
 
     using QNetworkAccessManagerPtr = QSharedPointer<QNetworkAccessManager>;
 public:
