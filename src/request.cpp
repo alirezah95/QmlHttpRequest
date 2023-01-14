@@ -227,26 +227,83 @@ QNetworkReply* Request::sendBodyRequestMultipart(const QVariant& body)
  */
 void Request::setupReplyConnections()
 {
-    connect(mNReply, &QNetworkReply::finished, this, [&]() {
+    connect(mNReply, &QNetworkReply::finished, this,
+            &Request::onReplyFinished);
+
+    connect(mNReply, &QNetworkReply::errorOccurred, this,
+            &Request::onReplyErrorOccured);
+
+    connect(mNReply, &QNetworkReply::redirected, this,
+            &Request::onReplyRedirected);
+
+    connect(mNReply, &QNetworkReply::downloadProgress, this,
+            &Request::onReplyDownloadProgress);
+
+    connect(mNReply, &QNetworkReply::uploadProgress, this,
+            &Request::onReplyUploadProgress);
+
+}
+
+void Request::onReplyFinished()
+{
+    if (mFinishedCallback.isCallable()) {
+        mFinishedCallback.call();
+    }
+}
+
+void Request::onReplyErrorOccured(int error)
+{
+    if (mNReply->error() == QNetworkReply::TimeoutError) {
         // If time out is reached only call timeout callback
-        if (mNReply->error() == QNetworkReply::TimeoutError) {
-            if (mTimeoutCallback.isCallable()) {
-                mTimeoutCallback.call();
-            }
+        if (mTimeoutCallback.isCallable()) {
+            mTimeoutCallback.call();
             return;
         }
+    }
 
+    if (mNReply->error() == QNetworkReply::OperationCanceledError) {
         // If operation was aborted
-        if (mNReply->error() == QNetworkReply::OperationCanceledError) {
-            if (mAbortedCallback.isCallable()) {
-                mAbortedCallback.call();
-            }
+        if (mAbortedCallback.isCallable()) {
+            mAbortedCallback.call();
+            return;
         }
+    }
 
-        if (mFinishedCallback.isCallable()) {
-            mFinishedCallback.call();
-        }
-    });
+    if (mErrorCallback.isCallable()) {
+        mErrorCallback.call({
+            mNReply->error(),
+            mNReply->errorString(),
+        });
+    }
+}
+
+void Request::onReplyRedirected(const QUrl& url)
+{
+    if (mRedirectedCallback.isCallable()) {
+        mRedirectedCallback.call({
+            url.toString(),
+        });
+    }
+}
+
+void Request::onReplyDownloadProgress(qint64 bytesReceived, qint64 bytesTotal)
+{
+    if (mDownloadProgressChangedCallback.isCallable()) {
+        mDownloadProgressChangedCallback.call({
+            double(bytesReceived),
+            double(bytesTotal),
+        });
+    }
+}
+
+void Request::onReplyUploadProgress(qint64 bytesSent, qint64 bytesTotal)
+{
+    if (mUploadProgressChangedCallback.isCallable()) {
+        mUploadProgressChangedCallback.call({
+            double(bytesSent),
+            double(bytesTotal),
+        });
+    }
 }
 
 }
