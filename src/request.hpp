@@ -26,6 +26,7 @@
 #include <QObject>
 #include <QNetworkRequest>
 #include <QSharedPointer>
+#include <QJSValue>
 
 #include "qmlhttprequest_global.hpp"
 
@@ -37,6 +38,13 @@ class QHR_EXPORT Request : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(int timeout READ timeout WRITE setTimeout)
+    Q_PROPERTY(QJSValue onDownloadProgressChanged   MEMBER downloadProgressChangedCallback)
+    Q_PROPERTY(QJSValue onUploadProgressChanged     MEMBER uploadProgressChangedCallback)
+    Q_PROPERTY(QJSValue onErrorOccurred             MEMBER errorOccurredCallback)
+    Q_PROPERTY(QJSValue onRedirected                MEMBER redirectedCallback)
+    Q_PROPERTY(QJSValue onFinished                  MEMBER finishedCallback)
+    Q_PROPERTY(QJSValue onAborted                   MEMBER abortedCallback)
+    Q_PROPERTY(QJSValue onTimeout                   MEMBER timeoutCallback)
 
     using QNetworkAccessManagerPtr = QSharedPointer<QNetworkAccessManager>;
 public:
@@ -79,6 +87,14 @@ private:
     QNetworkAccessManagerPtr mNam;
     QNetworkRequest mNRequest;
     Method mMethod;
+
+    QJSValue downloadProgressChangedCallback;
+    QJSValue uploadProgressChangedCallback;
+    QJSValue redirectedCallback;
+    QJSValue errorOccurredCallback;
+    QJSValue finishedCallback;
+    QJSValue abortedCallback;
+    QJSValue timeoutCallback;
 };
 
 }
