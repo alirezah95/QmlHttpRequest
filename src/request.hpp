@@ -89,6 +89,13 @@ private:
 
     void setupReplyConnections();
 
+private slots:
+    void onReplyFinished();
+    void onReplyErrorOccured(int error);
+    void onReplyRedirected(const QUrl& url);
+    void onReplyDownloadProgress(qint64 bytesReceived, qint64 bytesTotal);
+    void onReplyUploadProgress(qint64 bytesSent, qint64 bytesTotal);
+
 private:
     QNetworkAccessManagerPtr mNam;
     QNetworkRequest mNRequest;
