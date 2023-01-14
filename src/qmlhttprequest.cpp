@@ -11,7 +11,7 @@ namespace qhr {
 
 QmlHttpRequest::QmlHttpRequest(QObject* parent)
     : QObject { parent },
-      mNam(new QNetworkAccessManager(this))
+      mNam(new QNetworkAccessManager())
 { }
 
 /*!
@@ -23,7 +23,12 @@ QmlHttpRequest::QmlHttpRequest(QObject* parent)
  */
 Request* QmlHttpRequest::newRequest()
 {
-    return new Request(mNam, this);
+    return new Request(mNam, mNam->transferTimeout(), this);
+}
+
+void QmlHttpRequest::setDefaultTimeout(int timeout)
+{
+    mNam->setTransferTimeout(timeout);
 }
 
 }

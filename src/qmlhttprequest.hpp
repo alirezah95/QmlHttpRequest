@@ -40,6 +40,7 @@ public:
     explicit QmlHttpRequest(QObject* parent = nullptr);
 
     Q_INVOKABLE qhr::Request* newRequest();
+    Q_INVOKABLE void setDefaultTimeout(int timeout);
 
 private:
     QNetworkAccessManagerPtr mNam;
