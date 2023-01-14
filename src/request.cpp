@@ -1,5 +1,7 @@
 #include "request.hpp"
 
+#include <QNetworkAccessManager>
+
 namespace qhr {
 
 /*!
@@ -13,10 +15,10 @@ namespace qhr {
  */
 
 Request::Request(QObject* parent)
-    : QObject { parent },
-      mNam(QNetworkAccessManagerPtr()),
+    : QObject { parent }, mNam(QNetworkAccessManagerPtr()), mMethodName(""),
       mMethod(Method::INVALID)
-{ }
+{
+}
 
 Request::Request(QNetworkAccessManagerPtr nam, int timeout, QObject* parent)
     : Request(parent)
@@ -36,19 +38,20 @@ Request::Request(QNetworkAccessManagerPtr nam, int timeout, QObject* parent)
  */
 void Request::open(const QString& method, const QUrl& url)
 {
-    if (method == "") {
+    mMethodName = method.toUtf8();
+    if (mMethodName == "") {
         mMethod = Method::INVALID;
-    } else if (method.compare("GET", Qt::CaseInsensitive) == 0) {
+    } else if (mMethodName.compare("GET", Qt::CaseInsensitive) == 0) {
         mMethod = Method::GET;
-    } else if (method.compare("HEAD", Qt::CaseInsensitive) == 0) {
+    } else if (mMethodName.compare("HEAD", Qt::CaseInsensitive) == 0) {
         mMethod = Method::HEAD;
-    } else if (method.compare("POST", Qt::CaseInsensitive) == 0) {
+    } else if (mMethodName.compare("POST", Qt::CaseInsensitive) == 0) {
         mMethod = Method::POST;
-    } else if (method.compare("PUT", Qt::CaseInsensitive) == 0) {
+    } else if (mMethodName.compare("PUT", Qt::CaseInsensitive) == 0) {
         mMethod = Method::PUT;
-    } else if (method.compare("PATCH", Qt::CaseInsensitive) == 0) {
+    } else if (mMethodName.compare("PATCH", Qt::CaseInsensitive) == 0) {
         mMethod = Method::PATCH;
-    } else if (method.compare("DELETE", Qt::CaseInsensitive) == 0) {
+    } else if (mMethodName.compare("DELETE", Qt::CaseInsensitive) == 0) {
         mMethod = Method::DELETE;
     } else {
         mMethod = Method::CUSTOM;
@@ -80,7 +83,7 @@ void Request::setRequestHeader(const QString& header, const QString& value)
 void Request::send(QVariant body)
 {
     if (isOpen() && mNam) {
-        switch(mMethod) {
+        switch (mMethod) {
         case Method::INVALID:
             return;
         case Method::GET:
@@ -119,19 +122,73 @@ void Request::setNetworkAccessManager(QNetworkAccessManagerPtr nam)
     mNam = nam;
 }
 
+/*!
+ * \brief Request::setTimeout() Set transfer time out of this request. Zero
+ * means no time out.
+ * \param timeout Time in milliseconds
+ */
 void Request::setTimeout(int timeout)
 {
     mNRequest.setTransferTimeout(timeout);
 }
 
+/*!
+ * \brief Request::sendNoBodyRequest() This method is used by \ref
+ * Request::send() method to send a request that doesn't need a body, like GET,
+ * HEAD, etc
+ */
 void Request::sendNoBodyRequest()
 {
+    if (mNam) {
+        QNetworkReply* reply;
+        switch (mMethod) {
+        case Method::GET:
+        case Method::HEAD:
+            reply = mNam->sendCustomRequest(mNRequest, mMethodName);
+            break;
+        default:
+            return;
+        }
 
+        // Connect to signals of QNetworkReply
+    }
 }
 
+/*!
+ * \brief Request::sendBodyRequest() This method is used by \ref Request::send()
+ * to perform sending a request that needs (has) a body
+ * \param body
+ */
 void Request::sendBodyRequest(QVariant body)
 {
+    if (mNam) {
+        QNetworkReply* reply;
 
+        switch (mMethod) {
+        case Method::POST:
+        case Method::PUT:
+        case Method::PATCH:
+        case Method::DELETE:
+        case Method::CUSTOM: {
+            QByteArray contentType
+                = mNRequest.header(QNetworkRequest::ContentTypeHeader)
+                      .toByteArray();
+
+            if (contentType.isEmpty()) {
+                mNRequest.setHeader(
+                    QNetworkRequest::ContentTypeHeader, "application/json");
+            }
+
+            if (contentType.startsWith("application/")
+                || contentType.startsWith("text/")) {
+            } else if (contentType.startsWith("multipart/")) {
+            }
+            break;
+        }
+        default:
+            return;
+        }
+    }
 }
 
 }
