@@ -32,6 +32,12 @@ TEST_F(TestRequest, TestOpenMethod)
     ASSERT_TRUE(request.isOpen());
 }
 
+TEST_F(TestRequest, TestSetRequestHeader)
+{
+    request.open("GET", QUrl("https://fake.com"));
+    request.setRequestHeader("Content-type", "application-json");
+    ASSERT_STREQ(request.requestHeader("Content-type").constData(), "application-json");
+}
 
 int main(int argc, char* argv[])
 {
