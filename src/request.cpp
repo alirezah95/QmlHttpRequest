@@ -339,3 +339,8 @@ void Request::onReplyUploadProgress(qint64 bytesSent, qint64 bytesTotal)
 }
 
 }
+
+bool operator!=(const QJSValue& left, const QJSValue& right)
+{
+    return !left.equals(right);
+}

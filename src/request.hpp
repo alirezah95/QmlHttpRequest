@@ -123,4 +123,6 @@ private:
 
 }
 
+bool operator!=(const QJSValue& left, const QJSValue& right);
+
 #endif // REQUEST_HPP
