@@ -24,6 +24,7 @@
 #define REQUEST_HPP
 
 #include <QObject>
+#include <QNetworkRequest>
 
 #include "qmlhttprequest_global.hpp"
 
@@ -35,9 +36,16 @@ class QHR_EXPORT Request : public QObject
 public:
     explicit Request(QObject* parent = nullptr);
 
-    bool isOpen() const { return false; }
+    Q_INVOKABLE bool isOpen() const
+    {
+        return mMethodName != "" && mNRequest.url().isValid();
+    }
+    Q_INVOKABLE void open(const QString& method, const QUrl& url);
 
-signals:
+private:
+    QNetworkRequest mNRequest;
+
+    QString mMethodName;
 };
 
 }
