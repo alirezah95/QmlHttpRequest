@@ -14,14 +14,17 @@ namespace qhr {
 
 Request::Request(QObject* parent)
     : QObject { parent },
-      mNam(nullptr),
+      mNam(QNetworkAccessManagerPtr()),
       mMethod(Method::INVALID)
 { }
 
-Request::Request(QNetworkAccessManagerPtr nam, QObject* parent)
+Request::Request(QNetworkAccessManagerPtr nam, int timeout, QObject* parent)
     : Request(parent)
 {
     mNam = nam;
+    if (timeout != 0) {
+        mNRequest.setTransferTimeout(timeout);
+    }
 }
 
 /*!
@@ -114,6 +117,11 @@ QByteArray Request::requestHeader(const QByteArray& header) const
 void Request::setNetworkAccessManager(QNetworkAccessManagerPtr nam)
 {
     mNam = nam;
+}
+
+void Request::setTimeout(int timeout)
+{
+    mNRequest.setTransferTimeout(timeout);
 }
 
 void Request::sendNoBodyRequest()

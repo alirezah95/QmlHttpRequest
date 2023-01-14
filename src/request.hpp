@@ -36,6 +36,7 @@ namespace qhr {
 class QHR_EXPORT Request : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(int timeout READ timeout WRITE setTimeout)
 
     using QNetworkAccessManagerPtr = QSharedPointer<QNetworkAccessManager>;
 public:
@@ -51,7 +52,7 @@ public:
     };
 
     explicit Request(QObject* parent = nullptr);
-    Request(QNetworkAccessManagerPtr nam, QObject* parent = nullptr);
+    Request(QNetworkAccessManagerPtr nam, int timeout = 0, QObject* parent = nullptr);
 
     Q_INVOKABLE bool isOpen() const
     {
@@ -66,6 +67,9 @@ public:
 
     void setNetworkAccessManager(QNetworkAccessManagerPtr nam);
     auto networkAccessManager() const { return mNam; }
+
+    void setTimeout(int timeout);
+    int timeout() const { return mNRequest.transferTimeout(); }
 
 private:
     void sendNoBodyRequest();
