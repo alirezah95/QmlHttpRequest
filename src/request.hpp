@@ -36,12 +36,23 @@ class QHR_EXPORT Request : public QObject
 {
     Q_OBJECT
 public:
+    enum class Method: char {
+        INVALID = -1,
+        GET = 0,
+        HEAD,
+        POST,
+        PUT,
+        PATCH,
+        DELETE,
+        CUSTOM,
+    };
+
     explicit Request(QObject* parent = nullptr);
     Request(QNetworkAccessManager* nam, QObject* parent = nullptr);
 
     Q_INVOKABLE bool isOpen() const
     {
-        return mMethodName != "" && mNRequest.url().isValid();
+        return mMethod != Method::INVALID && mNRequest.url().isValid();
     }
 
     Q_INVOKABLE void open(const QString& method, const QUrl& url);
@@ -56,7 +67,7 @@ public:
 private:
     QNetworkAccessManager* mNam;
     QNetworkRequest mNRequest;
-    QString mMethodName;
+    Method mMethod;
 };
 
 }

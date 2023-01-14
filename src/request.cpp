@@ -12,7 +12,11 @@ namespace qhr {
  * XmlHttpRequest
  */
 
-Request::Request(QObject* parent) : QObject { parent }, mNam(nullptr) { }
+Request::Request(QObject* parent)
+    : QObject { parent },
+      mNam(nullptr),
+      mMethod(Method::INVALID)
+{ }
 
 Request::Request(QNetworkAccessManager* nam, QObject* parent)
     : Request(parent)
@@ -29,7 +33,23 @@ Request::Request(QNetworkAccessManager* nam, QObject* parent)
  */
 void Request::open(const QString& method, const QUrl& url)
 {
-    mMethodName = method;
+    if (method == "") {
+        mMethod = Method::INVALID;
+    } else if (method.compare("GET", Qt::CaseInsensitive) == 0) {
+        mMethod = Method::GET;
+    } else if (method.compare("HEAD", Qt::CaseInsensitive) == 0) {
+        mMethod = Method::HEAD;
+    } else if (method.compare("POST", Qt::CaseInsensitive) == 0) {
+        mMethod = Method::POST;
+    } else if (method.compare("PUT", Qt::CaseInsensitive) == 0) {
+        mMethod = Method::PUT;
+    } else if (method.compare("PATCH", Qt::CaseInsensitive) == 0) {
+        mMethod = Method::PATCH;
+    } else if (method.compare("DELETE", Qt::CaseInsensitive) == 0) {
+        mMethod = Method::DELETE;
+    } else {
+        mMethod = Method::CUSTOM;
+    }
     mNRequest.setUrl(url);
 }
 
@@ -57,22 +77,17 @@ void Request::setRequestHeader(const QString& header, const QString& value)
 void Request::send(QVariant body)
 {
     if (isOpen() && mNam) {
-        if (mMethodName.compare("GET", Qt::CaseInsensitive) == 0) {
-
-        } else if (mMethodName.compare("GET", Qt::CaseInsensitive) == 0) {
-
-        } else if (mMethodName.compare("HEAD", Qt::CaseInsensitive) == 0) {
-
-        } else if (mMethodName.compare("POST", Qt::CaseInsensitive) == 0) {
-
-        } else if (mMethodName.compare("PUT", Qt::CaseInsensitive) == 0) {
-
-        } else if (mMethodName.compare("PATCH", Qt::CaseInsensitive) == 0) {
-
-        } else if (mMethodName.compare("DELETE", Qt::CaseInsensitive) == 0) {
-
-        } else {
-
+        switch(mMethod) {
+        case Method::INVALID:
+            return;
+        case Method::GET:
+        case Method::HEAD:
+        case Method::POST:
+        case Method::PUT:
+        case Method::PATCH:
+        case Method::DELETE:
+        case Method::CUSTOM:
+            break;
         }
     }
 }
