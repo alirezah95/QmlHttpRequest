@@ -40,7 +40,11 @@ public:
     {
         return mMethodName != "" && mNRequest.url().isValid();
     }
+
     Q_INVOKABLE void open(const QString& method, const QUrl& url);
+    Q_INVOKABLE void setRequestHeader(const QString& header, const QString& value);
+
+    QByteArray requestHeader(const QByteArray& header) const;
 
 private:
     QNetworkRequest mNRequest;
