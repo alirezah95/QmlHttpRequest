@@ -49,6 +49,35 @@ void Request::setRequestHeader(const QString& header, const QString& value)
 }
 
 /*!
+ * \brief Request::send() Sends a method using \a\b QNetworkAccessManager
+ * injected into this.
+ * \param body Optional parameter for making a send request. If method is GET or
+ * HEAD body is ignored
+ */
+void Request::send(QVariant body)
+{
+    if (isOpen() && mNam) {
+        if (mMethodName.compare("GET", Qt::CaseInsensitive) == 0) {
+
+        } else if (mMethodName.compare("GET", Qt::CaseInsensitive) == 0) {
+
+        } else if (mMethodName.compare("HEAD", Qt::CaseInsensitive) == 0) {
+
+        } else if (mMethodName.compare("POST", Qt::CaseInsensitive) == 0) {
+
+        } else if (mMethodName.compare("PUT", Qt::CaseInsensitive) == 0) {
+
+        } else if (mMethodName.compare("PATCH", Qt::CaseInsensitive) == 0) {
+
+        } else if (mMethodName.compare("DELETE", Qt::CaseInsensitive) == 0) {
+
+        } else {
+
+        }
+    }
+}
+
+/*!
  * \brief Request::requestHeader() Returns header value for \a header. It calls
  * \a\b QNetworkRequet::rawHeader() internally.
  * \param header
