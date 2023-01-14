@@ -36,4 +36,19 @@ void QmlHttpRequest::setDefaultTimeout(int timeout)
     mNam->setTransferTimeout(timeout);
 }
 
+/*!
+ * \brief QmlHttpRequest::setRedirectPolicy() Set redirect policy.
+ * \see \a\b QNetworkRequest::RedirectPolicy
+ * \param rp
+ */
+void QmlHttpRequest::setRedirectPolicy(RedirectPolicy rp)
+{
+    mNam->setRedirectPolicy(QNetworkRequest::RedirectPolicy(rp));
+}
+
+QmlHttpRequest::RedirectPolicy QmlHttpRequest::redirectPolicy() const
+{
+    return RedirectPolicy(mNam->redirectPolicy());
+}
+
 }

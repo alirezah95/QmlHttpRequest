@@ -34,14 +34,25 @@ class Request;
 class QmlHttpRequest : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(int redirectPolicy READ redirectPolicy WRITE setRedirectPolicy)
 
     using QNetworkAccessManagerPtr = QSharedPointer<QNetworkAccessManager>;
 public:
+    enum RedirectPolicy {
+        ManualRedirectPolicy = QNetworkRequest::ManualRedirectPolicy,
+        NoLessSafeRedirectPolicy = QNetworkRequest::NoLessSafeRedirectPolicy,
+        SameOriginRedirectPolicy = QNetworkRequest::SameOriginRedirectPolicy,
+        UserVerifiedRedirectPolicy = QNetworkRequest::UserVerifiedRedirectPolicy,
+    };
+    Q_ENUM(RedirectPolicy)
+
     explicit QmlHttpRequest(QObject* parent = nullptr);
 
     Q_INVOKABLE qhr::Request* newRequest();
     Q_INVOKABLE void setDefaultTimeout(int timeout);
 
+    void setRedirectPolicy(RedirectPolicy rp);
+    RedirectPolicy redirectPolicy() const;
 private:
     QNetworkAccessManagerPtr mNam;
 };
