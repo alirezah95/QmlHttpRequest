@@ -4,6 +4,7 @@
 #include <gtest/gtest.h>
 
 #include "qmlhttprequest.hpp"
+#include "request.hpp"
 
 class TestQmlHttpRequest : public ::testing::Test
 {
@@ -14,6 +15,13 @@ public:
 TEST_F(TestQmlHttpRequest, TestNewRequest)
 {
     ASSERT_FALSE(qhr.newRequest() == nullptr);
+}
+
+TEST_F(TestQmlHttpRequest, TestDefaultTimeout)
+{
+    qhr.setDefaultTimeout(3000);
+    auto request = qhr.newRequest();
+    ASSERT_EQ(request.timeout());
 }
 
 int main(int argc, char* argv[])
