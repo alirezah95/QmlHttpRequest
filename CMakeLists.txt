@@ -17,6 +17,7 @@ else()
         src/qmlhttprequest_global.hpp
         src/request.hpp src/request.cpp
         src/qmlhttprequest.hpp src/qmlhttprequest.cpp
+        src/response.hpp src/response.cpp
     )
 
     target_compile_definitions(${PROJECT_NAME} PRIVATE QMLHTTPREQUEST_LIBRARY)
