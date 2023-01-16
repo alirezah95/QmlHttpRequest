@@ -214,10 +214,6 @@ void Request::sendNoBodyRequest()
         default:
             break;
         }
-
-        if (mNReply) {
-            setupReplyConnections();
-        }
     }
 }
 
@@ -254,10 +250,6 @@ void Request::sendBodyRequest(const QVariant& body)
         }
         default:
             break;
-        }
-
-        if (mNReply) {
-            setupReplyConnections();
         }
     }
 }
@@ -298,6 +290,8 @@ void Request::sendBodyRequestMultipart(const QVariant& body)
             for (auto it = bodyMap.constKeyValueBegin();
                  it != bodyMap.constKeyValueEnd(); ++it) {
                 QHttpPart part;
+
+                qDebug() << it->second.typeName();
 
                 QUrl url = it->second.toUrl();
                 if (url.isValid() && url.isLocalFile()) {
