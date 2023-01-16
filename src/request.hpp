@@ -93,12 +93,12 @@ public:
     int timeout() const { return mNRequest.transferTimeout(); }
 
     // Response's values methods
-    const auto& response()     const { return mResponse.response; };
-    const auto& responseText() const { return mResponse.responseText; };
-    const auto& responseType() const { return mResponse.responseType; };
-    const auto& responseUrl()  const { return mResponse.responseUrl; };
-    const auto& statusText()   const { return mResponse.statusText; };
-    auto        status()       const { return mResponse.status; };
+    QVariant response() const;
+    QString responseText() const;
+    auto responseType() const { return mResponse.responseType; };
+    auto responseUrl() const { return mResponse.responseUrl; };
+    auto statusText() const { return mResponse.statusText; };
+    auto status() const { return mResponse.status; };
 
 private:
     void sendNoBodyRequest();

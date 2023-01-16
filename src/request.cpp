@@ -169,6 +169,36 @@ void Request::setTimeout(int timeout)
 }
 
 /*!
+ * \brief Returns the response object of this network request. Currently is
+ * returns the results of the call to \a\b QNetworkReply::readAll()
+ * \todo Change this method to return a byte array, an js object based on
+ * network reply returnted content type
+ * \return
+ */
+QVariant Request::response() const
+{
+    if (mNReply) {
+        // Request is sent
+        return mNReply->readAll();
+    }
+    return mResponse.response;
+}
+
+/*!
+ * \brief Returns the response text of this request if content type is 'text'
+ * and an empty string if request is not set or was unsuccessful
+ * \return
+ */
+QString Request::responseText() const
+{
+    if (mNReply) {
+        // Request is sent
+        return mNReply->readAll();
+    }
+    return mResponse.responseText;
+}
+
+/*!
  * \brief Request::sendNoBodyRequest() This method is used by \ref
  * Request::send() method to send a request that doesn't need a body, like GET,
  * HEAD, etc
