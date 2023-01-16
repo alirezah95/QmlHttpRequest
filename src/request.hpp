@@ -42,9 +42,12 @@ class QHR_EXPORT Request : public QObject
     Q_OBJECT
     QML_ELEMENT
     // Response properties
-    Q_PROPERTY(int      status          READ replyStatus        CONSTANT)
-    Q_PROPERTY(QString  statusText      READ replyStatusText    CONSTANT)
-    Q_PROPERTY(QString  responseText    READ replyResponseText  CONSTANT)
+    Q_PROPERTY(QVariant    response     READ response       CONSTANT)
+    Q_PROPERTY(QString     responseText READ responseText   CONSTANT)
+    Q_PROPERTY(QString     responseType READ responseType   CONSTANT)
+    Q_PROPERTY(QUrl        responseUrl  READ responseUrl    CONSTANT)
+    Q_PROPERTY(QString     statusText   READ statusText     CONSTANT)
+    Q_PROPERTY(int         status       READ status         CONSTANT)
     // Request properties
     Q_PROPERTY(int timeout READ timeout WRITE setTimeout)
     Q_PROPERTY(QJSValue onDownloadProgressChanged   MEMBER mDownloadProgressChangedCallback)
@@ -89,9 +92,13 @@ public:
     void setTimeout(int timeout);
     int timeout() const { return mNRequest.transferTimeout(); }
 
-    int replyStatus() const;
-    QString replyStatusText() const;
-    QString replyResponseText() const;
+    // Response's values methods
+    const auto& response()     const { return mResponse.response; };
+    const auto& responseText() const { return mResponse.responseText; };
+    const auto& responseType() const { return mResponse.responseType; };
+    const auto& responseUrl()  const { return mResponse.responseUrl; };
+    const auto& statusText()   const { return mResponse.statusText; };
+    auto        status()       const { return mResponse.status; };
 
 private:
     void sendNoBodyRequest();
@@ -115,6 +122,8 @@ private:
     QNetworkReply* mNReply;
     QByteArray mMethodName;
     Method mMethod;
+
+    Response mResponse;
 
     QJSValue mDownloadProgressChangedCallback;
     QJSValue mUploadProgressChangedCallback;
