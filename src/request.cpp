@@ -19,12 +19,23 @@ namespace qhr {
  * XmlHttpRequest
  */
 
+/*!
+ * \brief Create an invalid, not-open \ref Request object
+ * \param parent
+ */
 Request::Request(QObject* parent)
     : QObject { parent }, mNam(QNetworkAccessManagerPtr()), mMethodName(""),
       mMethod(Method::INVALID), mNReply(nullptr)
 {
 }
 
+/*!
+ * \brief Initialize an object of this calss inject \a nam as \a\b
+ * QNetworkAccessManager and \a timeout for transfert timeout
+ * \param nam
+ * \param timeout
+ * \param parent
+ */
 Request::Request(QNetworkAccessManagerPtr nam, int timeout, QObject* parent)
     : Request(parent)
 {
@@ -138,6 +149,10 @@ QByteArray Request::requestHeader(const QByteArray& header) const
     return mNRequest.rawHeader(header);
 }
 
+/*!
+ * \brief Set interanl network access manager to \a nam
+ * \param nam
+ */
 void Request::setNetworkAccessManager(QNetworkAccessManagerPtr nam)
 {
     mNam = nam;
@@ -358,6 +373,10 @@ void Request::setupReplyConnections()
         &Request::onReplyUploadProgress);
 }
 
+/*!
+ * \brief Request::onReplyFinished() Connets to \a\b QNetworkReply::finished()
+ * signal and call \ref onFinished callback if any
+ */
 void Request::onReplyFinished()
 {
     if (mFinishedCallback.isCallable()) {
@@ -365,6 +384,11 @@ void Request::onReplyFinished()
     }
 }
 
+/*!
+ * \brief Request::onReplyErrorFinished() Connets to \a\b
+ * QNetworkReply::errorOccurred(int) signal and call \ref onError callback if
+ * any
+ */
 void Request::onReplyErrorOccured(int error)
 {
     if (mNReply->error() == QNetworkReply::TimeoutError) {
@@ -391,6 +415,11 @@ void Request::onReplyErrorOccured(int error)
     }
 }
 
+/*!
+ * \brief Request::onReplyRedirected() Connets to \a\b
+ * QNetworkReply::redirected(QUrl) signal and call \ref onRedirected callback if
+ * any
+ */
 void Request::onReplyRedirected(const QUrl& url)
 {
     if (mRedirectedCallback.isCallable()) {
@@ -400,6 +429,11 @@ void Request::onReplyRedirected(const QUrl& url)
     }
 }
 
+/*!
+ * \brief Request::onReplyDownloadProgress() Connets to \a\b
+ * QNetworkReply::downloadProgress(qint64, qint64) signal and call \ref
+ * onDownloadProgressChanged callback if any
+ */
 void Request::onReplyDownloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 {
     if (mDownloadProgressChangedCallback.isCallable()) {
@@ -410,6 +444,11 @@ void Request::onReplyDownloadProgress(qint64 bytesReceived, qint64 bytesTotal)
     }
 }
 
+/*!
+ * \brief Request::onReplyUploadProgress() Connets to \a\b
+ * QNetworkReply::uploadProgress(qint64, qint64) signal and call \ref
+ * onUploadProgressChanged callback if any
+ */
 void Request::onReplyUploadProgress(qint64 bytesSent, qint64 bytesTotal)
 {
     if (mUploadProgressChangedCallback.isCallable()) {
@@ -422,6 +461,14 @@ void Request::onReplyUploadProgress(qint64 bytesSent, qint64 bytesTotal)
 
 }
 
+/*!
+ * \related Request
+ * \brief operator != Implement != operator for \a\b QJSValue so using a
+ * QJSValue directly in a \a\b Q_PROPERTY as a MEBMER is possible
+ * \param left
+ * \param right
+ * \return
+ */
 bool operator!=(const QJSValue& left, const QJSValue& right)
 {
     return !left.equals(right);
