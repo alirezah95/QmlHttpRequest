@@ -377,6 +377,33 @@ void Request::setupReplyConnections()
 void Request::onReplyFinished()
 {
     if (mFinishedCallback.isCallable()) {
+        // Store mNReply results inside mReponse and delete mNReply
+        if (mNReply->error() == QNetworkReply::NoError) {
+            mResponse.response = QVariant();
+            mResponse.responseUrl = QUrl();
+            mResponse.responseType = "text";
+        } else {
+            mResponse.response = mNReply->readAll();
+            mResponse.responseUrl = mNReply->url();
+            mResponse.responseType = mNReply->rawHeader("Content-Type");
+        }
+
+        if (QVariant status
+            = mNReply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+            status.isValid()) {
+            mResponse.status = status.toInt();
+            mResponse.statusText
+                = mNReply->attribute(QNetworkRequest::HttpReasonPhraseAttribute)
+                      .toString();
+        } else {
+            mResponse.status = 0;
+            mResponse.statusText = "";
+        }
+        mResponse.responseText = mNReply->readAll();
+
+        mNReply->deleteLater();
+        mNReply = nullptr;
+
         mFinishedCallback.call();
     }
 }
