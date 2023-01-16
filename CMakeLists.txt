@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.24)
 if(QT_VERSION_MAJOR EQUAL 6)
 
 else()
-    project(qmlHttpRequest VERSION 0.1 LANGUAGES CXX)
+    project(qmlHttpRequest VERSION 0.3 LANGUAGES CXX)
 
     set(CMAKE_CXX_STANDARD 17)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -17,6 +17,7 @@ else()
         src/qmlhttprequest_global.hpp
         src/request.hpp src/request.cpp
         src/qmlhttprequest.hpp src/qmlhttprequest.cpp
+        src/response.hpp src/response.cpp
     )
 
     target_compile_definitions(${PROJECT_NAME} PRIVATE QMLHTTPREQUEST_LIBRARY)

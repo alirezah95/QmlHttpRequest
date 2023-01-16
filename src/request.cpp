@@ -168,37 +168,34 @@ void Request::setTimeout(int timeout)
     mNRequest.setTransferTimeout(timeout);
 }
 
-int Request::replyStatus() const
+/*!
+ * \brief Returns the response object of this network request. Currently is
+ * returns the results of the call to \a\b QNetworkReply::readAll()
+ * \todo Change this method to return a byte array, an js object based on
+ * network reply returnted content type
+ * \return
+ */
+QVariant Request::response() const
 {
-    if (mNReply->isFinished()) {
-        QVariant status
-            = mNReply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
-        if (status.isValid()) {
-            return status.toInt();
-        }
-    }
-    return 0;
-}
-
-QString Request::replyStatusText() const
-{
-    if (mNReply->isFinished()) {
-        QVariant statusText
-            = mNReply->attribute(QNetworkRequest::HttpReasonPhraseAttribute);
-
-        if (statusText.isValid()) {
-            return statusText.toString();
-        }
-    }
-    return QString();
-}
-
-QString Request::replyResponseText() const
-{
-    if (mNReply->isFinished()) {
+    if (mNReply) {
+        // Request is sent
         return mNReply->readAll();
     }
-    return QString();
+    return mResponse.response;
+}
+
+/*!
+ * \brief Returns the response text of this request if content type is 'text'
+ * and an empty string if request is not set or was unsuccessful
+ * \return
+ */
+QString Request::responseText() const
+{
+    if (mNReply) {
+        // Request is sent
+        return mNReply->readAll();
+    }
+    return mResponse.responseText;
 }
 
 /*!
@@ -216,10 +213,6 @@ void Request::sendNoBodyRequest()
             break;
         default:
             break;
-        }
-
-        if (mNReply) {
-            setupReplyConnections();
         }
     }
 }
@@ -258,10 +251,6 @@ void Request::sendBodyRequest(const QVariant& body)
         default:
             break;
         }
-
-        if (mNReply) {
-            setupReplyConnections();
-        }
     }
 }
 
@@ -296,45 +285,7 @@ void Request::sendBodyRequestMultipart(const QVariant& body)
         QHttpMultiPart* mpBody
             = new QHttpMultiPart(QHttpMultiPart::FormDataType);
 
-        const auto& bodyMap = body.toMap();
-        if (!bodyMap.isEmpty()) {
-            for (auto it = bodyMap.constKeyValueBegin();
-                 it != bodyMap.constKeyValueEnd(); ++it) {
-                QHttpPart part;
-
-                QUrl url = it->second.toUrl();
-                if (url.isValid() && url.isLocalFile()) {
-                    // Open file and set it to QHttpPart
-                    QFile* file = new QFile(url.toLocalFile());
-                    if (!file->exists() || !file->open(QFile::ReadOnly)) {
-                        qWarning() << "Cannot open file: " << url;
-                        continue;
-                    }
-
-                    auto mimeType = QMimeDatabase().mimeTypeForData(file);
-
-                    part.setHeader(
-                        QNetworkRequest::ContentTypeHeader, mimeType.name());
-                    part.setHeader(QNetworkRequest::ContentDispositionHeader,
-                        QString("form-data; name=\"" + it->first
-                            + "\"; filename=\"%1\"")
-                            .arg(file->fileName()));
-                    part.setBodyDevice(file);
-
-                    // Set file parent to mpBody so it deleted automatically
-                    file->setParent(mpBody);
-                } else {
-                    part.setHeader(QNetworkRequest::ContentTypeHeader,
-                        QVariant("text/plain"));
-                    part.setHeader(QNetworkRequest::ContentDispositionHeader,
-                        QString("form-data; name=\"") + it->first + "\"");
-                    part.setBody(it->second.toByteArray());
-                }
-
-                // Append new part to multi part body
-                mpBody->append(part);
-            }
-        }
+        addBodyDataToMultipart(mpBody, "", body);
 
         /*!
          * \internal
@@ -350,6 +301,69 @@ void Request::sendBodyRequestMultipart(const QVariant& body)
         mpBody->setParent(mNReply);
     }
     return;
+}
+
+void Request::addBodyDataToMultipart(
+    QHttpMultiPart* mpBody, QString prefix, const QVariant& body)
+{
+    const auto& bodyMap = body.toMap();
+    if (!bodyMap.isEmpty()) {
+        for (auto it = bodyMap.constKeyValueBegin();
+             it != bodyMap.constKeyValueEnd(); ++it) {
+            QHttpPart part;
+
+            qDebug() << "key: " << prefix + it->first;
+
+            switch (it->second.type()) {
+            case int(QMetaType::QString): {
+                if (QUrl url = it->second.toUrl();
+                    url.isValid() && url.isLocalFile()) {
+                    // Open file and set it to QHttpPart
+                    QFile* file = new QFile(url.toLocalFile());
+                    if (!file->exists() || !file->open(QFile::ReadOnly)) {
+                        qWarning() << "Cannot open file: " << url;
+                        continue;
+                    }
+
+                    auto mimeType = QMimeDatabase().mimeTypeForData(file);
+
+                    part.setHeader(QNetworkRequest::ContentTypeHeader,
+                        mimeType.name());
+                    part.setHeader(
+                        QNetworkRequest::ContentDispositionHeader,
+                        QString("form-data; name=\"" + prefix + it->first
+                            + "\"; filename=\"%1\"")
+                            .arg(file->fileName()));
+                    part.setBodyDevice(file);
+
+                    // Set file parent to mpBody so it deleted automatically
+                    file->setParent(mpBody);
+                } else {
+                    part.setHeader(QNetworkRequest::ContentTypeHeader,
+                        QVariant("text/plain"));
+                    part.setHeader(
+                        QNetworkRequest::ContentDispositionHeader,
+                        QString("form-data; name=\"") + prefix + it->first + "\"");
+                    part.setBody(it->second.toByteArray());
+                }
+
+                break;
+            }
+            case int(QMetaType::QVariantMap):
+                addBodyDataToMultipart(mpBody, it->first + ".", it->second);
+                break;
+            default:
+                part.setHeader(QNetworkRequest::ContentTypeHeader,
+                    QVariant("text/plain"));
+                part.setHeader(QNetworkRequest::ContentDispositionHeader,
+                    QString("form-data; name=\"") + prefix + it->first + "\"");
+                part.setBody(it->second.toByteArray());
+                break;
+            }
+            // Append new part to multi part body
+            mpBody->append(part);
+        }
+    }
 }
 
 /*!
@@ -380,6 +394,33 @@ void Request::setupReplyConnections()
 void Request::onReplyFinished()
 {
     if (mFinishedCallback.isCallable()) {
+        // Store mNReply results inside mReponse and delete mNReply
+        if (mNReply->error() == QNetworkReply::NoError) {
+            mResponse.response = QVariant();
+            mResponse.responseUrl = QUrl();
+            mResponse.responseType = "text";
+        } else {
+            mResponse.response = mNReply->readAll();
+            mResponse.responseUrl = mNReply->url();
+            mResponse.responseType = mNReply->rawHeader("Content-Type");
+        }
+
+        if (QVariant status
+            = mNReply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+            status.isValid()) {
+            mResponse.status = status.toInt();
+            mResponse.statusText
+                = mNReply->attribute(QNetworkRequest::HttpReasonPhraseAttribute)
+                      .toString();
+        } else {
+            mResponse.status = 0;
+            mResponse.statusText = "";
+        }
+        mResponse.responseText = mNReply->readAll();
+
+        mNReply->deleteLater();
+        mNReply = nullptr;
+
         mFinishedCallback.call();
     }
 }
