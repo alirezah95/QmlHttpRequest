@@ -285,47 +285,7 @@ void Request::sendBodyRequestMultipart(const QVariant& body)
         QHttpMultiPart* mpBody
             = new QHttpMultiPart(QHttpMultiPart::FormDataType);
 
-        const auto& bodyMap = body.toMap();
-        if (!bodyMap.isEmpty()) {
-            for (auto it = bodyMap.constKeyValueBegin();
-                 it != bodyMap.constKeyValueEnd(); ++it) {
-                QHttpPart part;
-
-                qDebug() << it->second.typeName();
-
-                QUrl url = it->second.toUrl();
-                if (url.isValid() && url.isLocalFile()) {
-                    // Open file and set it to QHttpPart
-                    QFile* file = new QFile(url.toLocalFile());
-                    if (!file->exists() || !file->open(QFile::ReadOnly)) {
-                        qWarning() << "Cannot open file: " << url;
-                        continue;
-                    }
-
-                    auto mimeType = QMimeDatabase().mimeTypeForData(file);
-
-                    part.setHeader(
-                        QNetworkRequest::ContentTypeHeader, mimeType.name());
-                    part.setHeader(QNetworkRequest::ContentDispositionHeader,
-                        QString("form-data; name=\"" + it->first
-                            + "\"; filename=\"%1\"")
-                            .arg(file->fileName()));
-                    part.setBodyDevice(file);
-
-                    // Set file parent to mpBody so it deleted automatically
-                    file->setParent(mpBody);
-                } else {
-                    part.setHeader(QNetworkRequest::ContentTypeHeader,
-                        QVariant("text/plain"));
-                    part.setHeader(QNetworkRequest::ContentDispositionHeader,
-                        QString("form-data; name=\"") + it->first + "\"");
-                    part.setBody(it->second.toByteArray());
-                }
-
-                // Append new part to multi part body
-                mpBody->append(part);
-            }
-        }
+        addBodyDataToMultipart(mpBody, "", body);
 
         /*!
          * \internal
@@ -341,6 +301,69 @@ void Request::sendBodyRequestMultipart(const QVariant& body)
         mpBody->setParent(mNReply);
     }
     return;
+}
+
+void Request::addBodyDataToMultipart(
+    QHttpMultiPart* mpBody, QString prefix, const QVariant& body)
+{
+    const auto& bodyMap = body.toMap();
+    if (!bodyMap.isEmpty()) {
+        for (auto it = bodyMap.constKeyValueBegin();
+             it != bodyMap.constKeyValueEnd(); ++it) {
+            QHttpPart part;
+
+            qDebug() << "key: " << prefix + it->first;
+
+            switch (it->second.type()) {
+            case int(QMetaType::QString): {
+                if (QUrl url = it->second.toUrl();
+                    url.isValid() && url.isLocalFile()) {
+                    // Open file and set it to QHttpPart
+                    QFile* file = new QFile(url.toLocalFile());
+                    if (!file->exists() || !file->open(QFile::ReadOnly)) {
+                        qWarning() << "Cannot open file: " << url;
+                        continue;
+                    }
+
+                    auto mimeType = QMimeDatabase().mimeTypeForData(file);
+
+                    part.setHeader(QNetworkRequest::ContentTypeHeader,
+                        mimeType.name());
+                    part.setHeader(
+                        QNetworkRequest::ContentDispositionHeader,
+                        QString("form-data; name=\"" + prefix + it->first
+                            + "\"; filename=\"%1\"")
+                            .arg(file->fileName()));
+                    part.setBodyDevice(file);
+
+                    // Set file parent to mpBody so it deleted automatically
+                    file->setParent(mpBody);
+                } else {
+                    part.setHeader(QNetworkRequest::ContentTypeHeader,
+                        QVariant("text/plain"));
+                    part.setHeader(
+                        QNetworkRequest::ContentDispositionHeader,
+                        QString("form-data; name=\"") + prefix + it->first + "\"");
+                    part.setBody(it->second.toByteArray());
+                }
+
+                break;
+            }
+            case int(QMetaType::QVariantMap):
+                addBodyDataToMultipart(mpBody, it->first + ".", it->second);
+                break;
+            default:
+                part.setHeader(QNetworkRequest::ContentTypeHeader,
+                    QVariant("text/plain"));
+                part.setHeader(QNetworkRequest::ContentDispositionHeader,
+                    QString("form-data; name=\"") + prefix + it->first + "\"");
+                part.setBody(it->second.toByteArray());
+                break;
+            }
+            // Append new part to multi part body
+            mpBody->append(part);
+        }
+    }
 }
 
 /*!
