@@ -8,6 +8,16 @@ namespace qhr {
  * status code, status text, response text, etc
  */
 
-Response::Response() { }
+Response::Response() : status(0) { }
+
+void Response::clear()
+{
+    response = QVariant();
+    responseText = QString();
+    responseType = QString();
+    responseUrl = QUrl();
+    statusText = QString();
+    status = 0;
+}
 
 }

@@ -32,6 +32,9 @@ class Response
 public:
     Response();
 
+    void clear();
+
+public:
     QVariant    response;
     QString     responseText;
     QString     responseType;
