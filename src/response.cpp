@@ -2,9 +2,12 @@
 
 namespace qhr {
 
-Response::Response()
-{
+/*!
+ * \class Response
+ * \brief Response class which holds the information of a network request, like
+ * status code, status text, response text, etc
+ */
 
-}
+Response::Response() { }
 
 }

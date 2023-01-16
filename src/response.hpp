@@ -23,12 +23,21 @@
 #ifndef RESPONSE_HPP
 #define RESPONSE_HPP
 
+#include <QtCore>
+
 namespace qhr {
 
 class Response
 {
 public:
     Response();
+
+    QVariant    response;
+    QString     responseText;
+    QString     responseType;
+    QUrl        responseUrl;
+    QString     statusText;
+    int         status;
 };
 
 }

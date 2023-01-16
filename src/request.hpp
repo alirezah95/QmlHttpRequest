@@ -30,6 +30,7 @@
 #include <QQmlEngine>
 
 #include "qmlhttprequest_global.hpp"
+#include "response.hpp"
 
 class QNetworkAccessManager;
 class QNetworkReply;
