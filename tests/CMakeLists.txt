@@ -38,6 +38,7 @@ function(add_new_gtest testname)
         )
         add_test(NAME "test_${testname}" COMMAND ${testname})
 
+        add_compile_definitions(QHR_TEST)
         target_link_libraries(${testname} PRIVATE
             Qt${QT_VERSION_MAJOR}::Qml
             Qt${QT_VERSION_MAJOR}::Core
@@ -45,7 +46,7 @@ function(add_new_gtest testname)
             Qt${QT_VERSION_MAJOR}::Network
             gtest
             gmock
-            qmlHttpRequest
+            QmlHttpRequest
         )
         target_include_directories(${testname} PRIVATE ../src)
     else()

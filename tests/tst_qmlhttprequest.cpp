@@ -6,10 +6,13 @@
 #include "qmlhttprequest.hpp"
 #include "request.hpp"
 
+class QmlHttpRequestTestable : public qhr::QmlHttpRequest
+{ };
+
 class TestQmlHttpRequest : public ::testing::Test
 {
 public:
-    qhr::QmlHttpRequest qhr;
+    QmlHttpRequestTestable qhr;
 };
 
 TEST_F(TestQmlHttpRequest, TestNewRequest)

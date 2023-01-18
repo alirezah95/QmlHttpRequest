@@ -9,6 +9,25 @@ namespace qhr {
  * can be used in QML to create a new \ref Request
  */
 
+/*!
+ * \brief Returns the singleton instance of \ref QmlHttpRequest
+ * \return
+ */
+QmlHttpRequest& QmlHttpRequest::singleton()
+{
+    static QmlHttpRequest qhr;
+    return qhr;
+}
+
+#if QT_VERSION_MAJOR == 6
+QmlHttpRequest* QmlHttpRequest::create(QQmlEngine* qmlEngine, QJSEngine* jsEngine)
+{
+    auto instance = &QmlHttpRequest::singleton();
+    QJSEngine::setObjectOwnership(instance, QJSEngine::CppOwnership);
+    return instance;
+}
+#endif
+
 QmlHttpRequest::QmlHttpRequest(QObject* parent)
     : QObject { parent },
       mNam(new QNetworkAccessManager())
@@ -52,5 +71,17 @@ QmlHttpRequest::RedirectPolicy QmlHttpRequest::redirectPolicy() const
 {
     return RedirectPolicy(mNam->redirectPolicy());
 }
+
+#if QT_VERSION_MAJOR == 5
+void registerQmlHttpRequestMethods()
+{
+    qmlRegisterSingletonInstance(
+        "qmlhttprequest", 1, 0, "QmlHttpRequest", &QmlHttpRequest::singleton());
+    qmlRegisterUncreatableType<qhr::Request>("qmlhttprequest", 1, 0,
+        "Request", "Request can not be created from QML");
+}
+
+Q_COREAPP_STARTUP_FUNCTION(registerQmlHttpRequestMethods)
+#endif
 
 }
