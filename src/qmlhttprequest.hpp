@@ -24,32 +24,40 @@
 #define QMLHTTPREQUEST_HPP
 
 #include <QNetworkAccessManager>
-#include <QSharedPointer>
-#include <QQmlEngine>
 #include <QObject>
+#include <QQmlEngine>
+#include <QSharedPointer>
+
+#include "request.hpp"
 
 namespace qhr {
-
-class Request;
 
 class QmlHttpRequest : public QObject
 {
     Q_OBJECT
     QML_ELEMENT
-    Q_PROPERTY(RedirectPolicy redirectPolicy READ redirectPolicy WRITE setRedirectPolicy)
+    QML_SINGLETON
+    Q_PROPERTY(RedirectPolicy redirectPolicy READ redirectPolicy WRITE
+            setRedirectPolicy)
 
     using QNetworkAccessManagerPtr = QSharedPointer<QNetworkAccessManager>;
+
 public:
-    enum RedirectPolicy {
+    enum RedirectPolicy
+    {
         ManualRedirectPolicy = QNetworkRequest::ManualRedirectPolicy,
         NoLessSafeRedirectPolicy = QNetworkRequest::NoLessSafeRedirectPolicy,
         SameOriginRedirectPolicy = QNetworkRequest::SameOriginRedirectPolicy,
-        UserVerifiedRedirectPolicy = QNetworkRequest::UserVerifiedRedirectPolicy,
+        UserVerifiedRedirectPolicy
+        = QNetworkRequest::UserVerifiedRedirectPolicy,
     };
     Q_ENUM(RedirectPolicy)
 
 public:
     static QmlHttpRequest& singleton();
+#if QT_VERSION_MAJOR == 6
+    static QmlHttpRequest* create(QQmlEngine* qmlEngine, QJSEngine* jsEngine);
+#endif
 
     Q_INVOKABLE qhr::Request* newRequest();
     Q_INVOKABLE void setDefaultTimeout(int timeout);

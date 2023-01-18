@@ -19,6 +19,15 @@ QmlHttpRequest& QmlHttpRequest::singleton()
     return qhr;
 }
 
+#if QT_VERSION_MAJOR == 6
+QmlHttpRequest* QmlHttpRequest::create(QQmlEngine* qmlEngine, QJSEngine* jsEngine)
+{
+    auto instance = &QmlHttpRequest::singleton();
+    QJSEngine::setObjectOwnership(instance, QJSEngine::CppOwnership);
+    return instance;
+}
+#endif
+
 QmlHttpRequest::QmlHttpRequest(QObject* parent)
     : QObject { parent },
       mNam(new QNetworkAccessManager())
