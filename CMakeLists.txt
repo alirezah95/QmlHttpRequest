@@ -9,12 +9,16 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
+set(QHR_VERSION
+    1.4
+)
+
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_add_qml_module(QmlHttpRequest
         URI "QmlHttpRequest"
         OUTPUT_DIRECTORY
             ${CMAKE_BINARY_DIR}/QmlHttpRequest
-        VERSION 1.3
+        VERSION ${QHR_VERSION}
         SOURCES
             src/qmlhttprequest_global.hpp
             src/request.hpp src/request.cpp
@@ -33,7 +37,7 @@ if(QT_VERSION_MAJOR EQUAL 6)
         QmlHttpRequest
     )
 else()
-    project(QmlHttpRequest VERSION 1.3 LANGUAGES CXX)
+    project(QmlHttpRequest VERSION ${QHR_VERSION} LANGUAGES CXX)
 
     find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Network Qml)
 
