@@ -25,6 +25,7 @@ if(QT_VERSION_MAJOR EQUAL 6)
     # This is required on Windows and MSVC
     target_link_directories(${PROJECT_NAME} PRIVATE
         ${CMAKE_CURRENT_BINARY_DIR}
+        ${CMAKE_BINARY_DIR}/QmlHttpRequest
     )
 
     # Next line is required for Qml Preview on Linux to be able to load the module
