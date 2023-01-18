@@ -312,8 +312,6 @@ void Request::addBodyDataToMultipart(
              it != bodyMap.constKeyValueEnd(); ++it) {
             QHttpPart part;
 
-            qDebug() << "key: " << prefix + it->first;
-
             switch (it->second.type()) {
             case int(QMetaType::QString): {
                 if (QUrl url = it->second.toUrl();
