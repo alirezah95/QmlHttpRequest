@@ -57,7 +57,11 @@ public:
     void setRedirectPolicy(RedirectPolicy rp);
     RedirectPolicy redirectPolicy() const;
 
+#ifdef QHR_TEST
 protected:
+#else
+private:
+#endif
     explicit QmlHttpRequest(QObject* parent = nullptr);
 
 private:
