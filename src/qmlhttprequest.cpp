@@ -9,6 +9,16 @@ namespace qhr {
  * can be used in QML to create a new \ref Request
  */
 
+/*!
+ * \brief Returns the singleton instance of \ref QmlHttpRequest
+ * \return
+ */
+QmlHttpRequest& QmlHttpRequest::singleton()
+{
+    static QmlHttpRequest qhr;
+    return qhr;
+}
+
 QmlHttpRequest::QmlHttpRequest(QObject* parent)
     : QObject { parent },
       mNam(new QNetworkAccessManager())

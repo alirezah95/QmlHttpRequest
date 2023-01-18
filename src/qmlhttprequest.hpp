@@ -48,13 +48,18 @@ public:
     };
     Q_ENUM(RedirectPolicy)
 
-    explicit QmlHttpRequest(QObject* parent = nullptr);
+public:
+    static QmlHttpRequest& singleton();
 
     Q_INVOKABLE qhr::Request* newRequest();
     Q_INVOKABLE void setDefaultTimeout(int timeout);
 
     void setRedirectPolicy(RedirectPolicy rp);
     RedirectPolicy redirectPolicy() const;
+
+protected:
+    explicit QmlHttpRequest(QObject* parent = nullptr);
+
 private:
     QNetworkAccessManagerPtr mNam;
 };
