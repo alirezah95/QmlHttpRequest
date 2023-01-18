@@ -14,7 +14,7 @@ if(QT_VERSION_MAJOR EQUAL 6)
         URI "QmlHttpRequest"
         OUTPUT_DIRECTORY
             ${CMAKE_BINARY_DIR}/QmlHttpRequest
-        VERSION 0.3
+        VERSION 1.3
         SOURCES
             src/qmlhttprequest_global.hpp
             src/request.hpp src/request.cpp
@@ -32,7 +32,7 @@ if(QT_VERSION_MAJOR EQUAL 6)
         QmlHttpRequest
     )
 else()
-    project(QmlHttpRequest VERSION 0.3 LANGUAGES CXX)
+    project(QmlHttpRequest VERSION 1.3 LANGUAGES CXX)
 
     find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Network Qml)
 
