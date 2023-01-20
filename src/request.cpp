@@ -285,7 +285,18 @@ void Request::sendBodyRequestMultipart(const QVariant& body)
         QHttpMultiPart* mpBody
             = new QHttpMultiPart(QHttpMultiPart::FormDataType);
 
-        addBodyDataToMultipart(mpBody, "", body);
+        if (body.canConvert<QVariantMap>()) {
+            multipartAddObject(
+                mpBody, "", QJsonObject::fromVariantMap(body.toMap()));
+        } else if (body.canConvert<QVariantList>()) {
+            multipartAddArray(
+                mpBody, "", QJsonArray::fromVariantList(body.toList()));
+        } else if (body.canConvert<QJsonValue>()) {
+            multipartAddValue(mpBody, "", QJsonValue::fromVariant(body));
+        } else {
+            delete mpBody;
+            return;
+        }
 
         /*!
          * \internal
@@ -303,65 +314,84 @@ void Request::sendBodyRequestMultipart(const QVariant& body)
     return;
 }
 
-void Request::addBodyDataToMultipart(
-    QHttpMultiPart* mpBody, QString prefix, const QVariant& body)
+void Request::multipartAddObject(
+    QHttpMultiPart* mpBody, QString prefix, const QJsonObject& body)
 {
-    const auto& bodyMap = body.toMap();
-    if (!bodyMap.isEmpty()) {
-        for (auto it = bodyMap.constKeyValueBegin();
-             it != bodyMap.constKeyValueEnd(); ++it) {
-            QHttpPart part;
-
-            switch (it->second.type()) {
-            case int(QMetaType::QString): {
-                if (QUrl url = it->second.toUrl();
-                    url.isValid() && url.isLocalFile()) {
-                    // Open file and set it to QHttpPart
-                    QFile* file = new QFile(url.toLocalFile());
-                    if (!file->exists() || !file->open(QFile::ReadOnly)) {
-                        qWarning() << "Cannot open file: " << url;
-                        continue;
-                    }
-
-                    auto mimeType = QMimeDatabase().mimeTypeForData(file);
-
-                    part.setHeader(QNetworkRequest::ContentTypeHeader,
-                        mimeType.name());
-                    part.setHeader(
-                        QNetworkRequest::ContentDispositionHeader,
-                        QString("form-data; name=\"" + prefix + it->first
-                            + "\"; filename=\"%1\"")
-                            .arg(file->fileName()));
-                    part.setBodyDevice(file);
-
-                    // Set file parent to mpBody so it deleted automatically
-                    file->setParent(mpBody);
-                } else {
-                    part.setHeader(QNetworkRequest::ContentTypeHeader,
-                        QVariant("text/plain"));
-                    part.setHeader(
-                        QNetworkRequest::ContentDispositionHeader,
-                        QString("form-data; name=\"") + prefix + it->first + "\"");
-                    part.setBody(it->second.toByteArray());
-                }
-
-                break;
-            }
-            case int(QMetaType::QVariantMap):
-                addBodyDataToMultipart(mpBody, it->first + ".", it->second);
-                break;
-            default:
-                part.setHeader(QNetworkRequest::ContentTypeHeader,
-                    QVariant("text/plain"));
-                part.setHeader(QNetworkRequest::ContentDispositionHeader,
-                    QString("form-data; name=\"") + prefix + it->first + "\"");
-                part.setBody(it->second.toByteArray());
-                break;
-            }
-            // Append new part to multi part body
-            mpBody->append(part);
+    for (auto it = body.constBegin(); it != body.constEnd(); ++it) {
+        QString fieldName
+            = prefix == "" ? it.key() : QString("%1.%2").arg(prefix, it.key());
+        switch (it.value().type()) {
+        case QJsonValue::Bool:
+        case QJsonValue::Double:
+        case QJsonValue::String:
+            multipartAddValue(mpBody, fieldName, it.value());
+            break;
+        case QJsonValue::Object:
+            multipartAddObject(mpBody, fieldName, it.value().toObject());
+            break;
+        case QJsonValue::Array:
+            multipartAddArray(mpBody, fieldName, it.value().toArray());
+            break;
+        case QJsonValue::Null:
+        case QJsonValue::Undefined:
+            break;
         }
     }
+
+    return;
+}
+
+void Request::multipartAddArray(
+    QHttpMultiPart* mpBody, QString prefix, const QJsonArray& body)
+{
+    QJsonDocument doc;
+    doc.setArray(body);
+
+    QHttpPart part;
+    part.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("text/plain"));
+    part.setHeader(QNetworkRequest::ContentDispositionHeader,
+        QString("form-data; name=\"") + prefix + "\"");
+    part.setBody(doc.toJson());
+
+    mpBody->append(part);
+    return;
+}
+
+void Request::multipartAddValue(
+    QHttpMultiPart* mpBody, QString prefix, const QJsonValue& body)
+{
+    QHttpPart part;
+    if (body.isString()) {
+        if (QUrl url(body.toString()); url.isValid() && url.isLocalFile()) {
+            // Open file and set it to QHttpPart
+            QFile* file = new QFile(url.toLocalFile());
+            if (!file->exists() || !file->open(QFile::ReadOnly)) {
+                qWarning() << "Cannot open file: " << url;
+            }
+
+            auto mimeType = QMimeDatabase().mimeTypeForData(file);
+
+            part.setHeader(QNetworkRequest::ContentTypeHeader, mimeType.name());
+            part.setHeader(QNetworkRequest::ContentDispositionHeader,
+                QString("form-data; name=\"" + prefix + "\"; filename=\"%1\"")
+                    .arg(file->fileName()));
+            part.setBodyDevice(file);
+
+            // Set file parent to mpBody so it deleted automatically
+            file->setParent(mpBody);
+
+            mpBody->append(part);
+            return;
+        }
+    }
+
+    part.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("text/plain"));
+    part.setHeader(QNetworkRequest::ContentDispositionHeader,
+        QString("form-data; name=\"") + prefix + "\"");
+    part.setBody(body.toVariant().toString().toUtf8());
+
+    mpBody->append(part);
+    return;
 }
 
 /*!
