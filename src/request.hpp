@@ -114,8 +114,10 @@ private:
 
     void sendBodyRequestText(const QVariant& body);
     void sendBodyRequestMultipart(const QVariant& body);
-    void addBodyDataToMultipart(
-        QHttpMultiPart* mpBody, QString prefix, const QVariant& body);
+
+    void multipartAddObject(QHttpMultiPart* mpBody, QString prefix, const QJsonObject& object);
+    void multipartAddArray(QHttpMultiPart* mpBody, QString prefix, const QJsonArray& array);
+    void multipartAddValue(QHttpMultiPart* mpBody, QString prefix, const QJsonValue& value);
 
     void setupReplyConnections();
 

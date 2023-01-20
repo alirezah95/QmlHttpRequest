@@ -10,7 +10,7 @@ include_directories(
 )
 
 set(QHR_VERSION
-    1.4
+    1.4.1
 )
 
 if(QT_VERSION_MAJOR EQUAL 6)
