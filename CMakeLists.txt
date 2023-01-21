@@ -9,6 +9,12 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
+set(ENABLE_TESTING
+    ON
+    CACHE BOOL "Enable unit testing. Note that Google test library must be
+    installed on properly configrued on your sysytem"
+)
+
 set(QHR_VERSION
     1.4.1
 )
@@ -16,6 +22,7 @@ set(QHR_VERSION
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_add_qml_module(QmlHttpRequest
         URI "QmlHttpRequest"
+        SHARED
         OUTPUT_DIRECTORY
             ${CMAKE_BINARY_DIR}/QmlHttpRequest
         VERSION ${QHR_VERSION}
@@ -25,6 +32,8 @@ if(QT_VERSION_MAJOR EQUAL 6)
             src/qmlhttprequest.hpp src/qmlhttprequest.cpp
             src/response.hpp src/response.cpp
         )
+
+    target_compile_definitions(QmlHttpRequest PRIVATE QMLHTTPREQUEST_LIBRARY)
 
     # This is required on Windows and MSVC
     target_link_directories(${PROJECT_NAME} PRIVATE
@@ -57,5 +66,7 @@ else()
     )
 endif()
 
-# Add tests subdirectory
-add_subdirectory("tests/")
+if (ENABLE_TESTING)
+    # Add tests subdirectory
+    add_subdirectory("tests/")
+endif()
