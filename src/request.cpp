@@ -463,7 +463,13 @@ void Request::onReplyFinished()
         mNReply->deleteLater();
         mNReply = nullptr;
 
-        mFinishedCallback.call();
+        auto result = mFinishedCallback.call();
+        if (result.isError()) {
+            qDebug("%s:%s: %s",
+                qPrintable(result.property("fileName").toString()),
+                qPrintable(result.property("lineNumber").toString()),
+                qPrintable(result.toString().toStdString().c_str()));
+        }
     }
 }
 
@@ -477,7 +483,13 @@ void Request::onReplyErrorOccured(int error)
     if (mNReply->error() == QNetworkReply::TimeoutError) {
         // If time out is reached only call timeout callback
         if (mTimeoutCallback.isCallable()) {
-            mTimeoutCallback.call();
+            auto result = mTimeoutCallback.call();
+            if (result.isError()) {
+                qDebug("%s:%s: %s",
+                    qPrintable(result.property("fileName").toString()),
+                    qPrintable(result.property("lineNumber").toString()),
+                    qPrintable(result.toString().toStdString().c_str()));
+            }
             return;
         }
     }
@@ -485,16 +497,28 @@ void Request::onReplyErrorOccured(int error)
     if (mNReply->error() == QNetworkReply::OperationCanceledError) {
         // If operation was aborted
         if (mAbortedCallback.isCallable()) {
-            mAbortedCallback.call();
+            auto result = mAbortedCallback.call();
+            if (result.isError()) {
+                qDebug("%s:%s: %s",
+                    qPrintable(result.property("fileName").toString()),
+                    qPrintable(result.property("lineNumber").toString()),
+                    qPrintable(result.toString().toStdString().c_str()));
+            }
             return;
         }
     }
 
     if (mErrorCallback.isCallable()) {
-        mErrorCallback.call({
+        auto result = mErrorCallback.call({
             mNReply->error(),
             mNReply->errorString(),
         });
+        if (result.isError()) {
+            qDebug("%s:%s: %s",
+                qPrintable(result.property("fileName").toString()),
+                qPrintable(result.property("lineNumber").toString()),
+                qPrintable(result.toString().toStdString().c_str()));
+        }
     }
 }
 
@@ -506,9 +530,15 @@ void Request::onReplyErrorOccured(int error)
 void Request::onReplyRedirected(const QUrl& url)
 {
     if (mRedirectedCallback.isCallable()) {
-        mRedirectedCallback.call({
+        auto result = mRedirectedCallback.call({
             url.toString(),
         });
+        if (result.isError()) {
+            qDebug("%s:%s: %s",
+                qPrintable(result.property("fileName").toString()),
+                qPrintable(result.property("lineNumber").toString()),
+                qPrintable(result.toString().toStdString().c_str()));
+        }
     }
 }
 
@@ -520,10 +550,16 @@ void Request::onReplyRedirected(const QUrl& url)
 void Request::onReplyDownloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 {
     if (mDownloadProgressChangedCallback.isCallable()) {
-        mDownloadProgressChangedCallback.call({
+        auto result = mDownloadProgressChangedCallback.call({
             double(bytesReceived),
             double(bytesTotal),
         });
+        if (result.isError()) {
+            qDebug("%s:%s: %s",
+                qPrintable(result.property("fileName").toString()),
+                qPrintable(result.property("lineNumber").toString()),
+                qPrintable(result.toString().toStdString().c_str()));
+        }
     }
 }
 
@@ -535,10 +571,16 @@ void Request::onReplyDownloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 void Request::onReplyUploadProgress(qint64 bytesSent, qint64 bytesTotal)
 {
     if (mUploadProgressChangedCallback.isCallable()) {
-        mUploadProgressChangedCallback.call({
+        auto result = mUploadProgressChangedCallback.call({
             double(bytesSent),
             double(bytesTotal),
         });
+        if (result.isError()) {
+            qDebug("%s:%s: %s",
+                qPrintable(result.property("fileName").toString()),
+                qPrintable(result.property("lineNumber").toString()),
+                qPrintable(result.toString().toStdString().c_str()));
+        }
     }
 }
 
