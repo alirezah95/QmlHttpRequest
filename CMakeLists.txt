@@ -9,6 +9,12 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
+set(ENABLE_TESTING
+    ON
+    CACHE BOOL "Enable unit testing. Note that Google test library must be
+    installed on properly configrued on your sysytem"
+)
+
 set(QHR_VERSION
     1.4.1
 )
@@ -60,5 +66,7 @@ else()
     )
 endif()
 
-# Add tests subdirectory
-add_subdirectory("tests/")
+if (ENABLE_TESTING)
+    # Add tests subdirectory
+    add_subdirectory("tests/")
+endif()
