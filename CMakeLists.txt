@@ -16,6 +16,7 @@ set(QHR_VERSION
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_add_qml_module(QmlHttpRequest
         URI "QmlHttpRequest"
+        SHARED
         OUTPUT_DIRECTORY
             ${CMAKE_BINARY_DIR}/QmlHttpRequest
         VERSION ${QHR_VERSION}
@@ -25,6 +26,8 @@ if(QT_VERSION_MAJOR EQUAL 6)
             src/qmlhttprequest.hpp src/qmlhttprequest.cpp
             src/response.hpp src/response.cpp
         )
+
+    target_compile_definitions(QmlHttpRequest PRIVATE QMLHTTPREQUEST_LIBRARY)
 
     # This is required on Windows and MSVC
     target_link_directories(${PROJECT_NAME} PRIVATE
