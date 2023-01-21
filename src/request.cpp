@@ -47,13 +47,7 @@ Request::Request(QNetworkAccessManagerPtr nam, int timeout, QObject* parent)
 
 Request::~Request()
 {
-    if (mNReply) {
-        if (mNReply->isRunning()) {
-            mNReply->abort();
-        }
-
-        mNReply->deleteLater();
-    }
+    abort();
 }
 
 /*!
@@ -136,6 +130,26 @@ void Request::send(const QVariant& body)
             setupReplyConnections();
         }
     }
+}
+
+void Request::abort()
+{
+    if (mNReply) {
+        if (mNReply->isRunning()) {
+            mNReply->abort();
+        }
+
+        mNReply->deleteLater();
+
+        mResponse.status = 0;
+        mResponse.statusText = "";
+        mResponse.responseText = "{ \"detail\": \"Operation aborted\" }";
+    }
+}
+
+void Request::destroy()
+{
+    deleteLater();
 }
 
 /*!
