@@ -1,6 +1,8 @@
 #include "qmlhttprequest.hpp"
 #include "request.hpp"
 
+#include "config.hpp"
+
 namespace qhr {
 
 /*!
@@ -75,10 +77,11 @@ QmlHttpRequest::RedirectPolicy QmlHttpRequest::redirectPolicy() const
 #if QT_VERSION_MAJOR == 5
 void registerQmlHttpRequestMethods()
 {
-    qmlRegisterSingletonInstance(
-        "qmlhttprequest", 1, 0, "QmlHttpRequest", &QmlHttpRequest::singleton());
-    qmlRegisterUncreatableType<qhr::Request>("qmlhttprequest", 1, 0,
-        "Request", "Request can not be created from QML");
+    qmlRegisterSingletonInstance(PROJECT_NAME, PROJECT_VERSION_MAJOR,
+        PROJECT_VERSION_MINOR, "QmlHttpRequest", &QmlHttpRequest::singleton());
+    qmlRegisterUncreatableType<qhr::Request>("QmlHttpRequest",
+        PROJECT_VERSION_MAJOR, PROJECT_VERSION_MINOR, "Request",
+        "Request can not be created from QML");
 }
 
 Q_COREAPP_STARTUP_FUNCTION(registerQmlHttpRequestMethods)
