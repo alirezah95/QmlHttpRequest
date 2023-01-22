@@ -31,10 +31,8 @@ QmlHttpRequest* QmlHttpRequest::create(QQmlEngine* qmlEngine, QJSEngine* jsEngin
 #endif
 
 QmlHttpRequest::QmlHttpRequest(QObject* parent)
-    : QObject { parent },
-      mNam(new QNetworkAccessManager())
+    : QObject { parent }, mNam(new QNetworkAccessManager())
 {
-    setRedirectPolicy(RedirectPolicy::NoLessSafeRedirectPolicy);
 }
 
 /*!
