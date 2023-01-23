@@ -51,17 +51,15 @@ class QHR_EXPORT Request : public QObject
     Q_PROPERTY(QString statusText READ statusText CONSTANT)
     Q_PROPERTY(int status READ status CONSTANT)
     // Request properties
+    Q_PROPERTY(State readyState READ readyState() CONSTANT)
     Q_PROPERTY(int timeout READ timeout WRITE setTimeout)
-    Q_PROPERTY(QJSValue onDownloadProgressChanged MEMBER
-            mDownloadProgressChangedCallback)
-    Q_PROPERTY(
-        QJSValue onUploadProgressChanged MEMBER mUploadProgressChangedCallback)
-    Q_PROPERTY(QJSValue onreadystatechange MEMBER mOnReadyStateChangeCallback)
-    Q_PROPERTY(QJSValue onRedirected MEMBER mRedirectedCallback)
-    Q_PROPERTY(QJSValue onFinished MEMBER mFinishedCallback)
-    Q_PROPERTY(QJSValue onAborted MEMBER mAbortedCallback)
-    Q_PROPERTY(QJSValue onTimeout MEMBER mTimeoutCallback)
-    Q_PROPERTY(QJSValue onError MEMBER mErrorCallback)
+    Q_PROPERTY(QJSValue ondownloadprogress MEMBER mDownloadProgressCb)
+    Q_PROPERTY(QJSValue onuploadprogress MEMBER mUploadProgressCb)
+    Q_PROPERTY(QJSValue onreadystatechange MEMBER mOnReadyStateCb)
+    Q_PROPERTY(QJSValue onredirected MEMBER mRedirectedCb)
+    Q_PROPERTY(QJSValue onaborted MEMBER mAbortedCb)
+    Q_PROPERTY(QJSValue ontimeout MEMBER mTimeoutCb)
+    Q_PROPERTY(QJSValue onerror MEMBER mErrorCb)
 
     using QNetworkAccessManagerPtr = QSharedPointer<QNetworkAccessManager>;
 
@@ -112,6 +110,8 @@ public:
     void setTimeout(int timeout);
     int timeout() const { return mNRequest.transferTimeout(); }
 
+    State readyState() const {return mState; }
+
     // Response's values methods
     QVariant response() const;
     QString responseText() const;
@@ -151,14 +151,13 @@ private:
     Method mMethod;
     Response mResponse;
 
-    QJSValue mDownloadProgressChangedCallback;
-    QJSValue mUploadProgressChangedCallback;
-    QJSValue mOnReadyStateChangeCallback;
-    QJSValue mRedirectedCallback;
-    QJSValue mFinishedCallback;
-    QJSValue mAbortedCallback;
-    QJSValue mTimeoutCallback;
-    QJSValue mErrorCallback;
+    QJSValue mDownloadProgressCb;
+    QJSValue mUploadProgressCb;
+    QJSValue mReadyStateCb;
+    QJSValue mRedirectedCb;
+    QJSValue mAbortedCb;
+    QJSValue mTimeoutCb;
+    QJSValue mErrorCb;
 };
 
 }
