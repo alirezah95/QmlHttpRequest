@@ -51,16 +51,15 @@ class QHR_EXPORT Request : public QObject
     Q_PROPERTY(QString statusText READ statusText CONSTANT)
     Q_PROPERTY(int status READ status CONSTANT)
     // Request properties
+    Q_PROPERTY(State readyState READ readyState() CONSTANT)
     Q_PROPERTY(int timeout READ timeout WRITE setTimeout)
-    Q_PROPERTY(QJSValue onDownloadProgressChanged MEMBER
-            mDownloadProgressChangedCallback)
-    Q_PROPERTY(
-        QJSValue onUploadProgressChanged MEMBER mUploadProgressChangedCallback)
-    Q_PROPERTY(QJSValue onRedirected MEMBER mRedirectedCallback)
-    Q_PROPERTY(QJSValue onFinished MEMBER mFinishedCallback)
-    Q_PROPERTY(QJSValue onAborted MEMBER mAbortedCallback)
-    Q_PROPERTY(QJSValue onTimeout MEMBER mTimeoutCallback)
-    Q_PROPERTY(QJSValue onError MEMBER mErrorCallback)
+    Q_PROPERTY(QJSValue ondownloadprogress MEMBER mDownloadProgressCb)
+    Q_PROPERTY(QJSValue onuploadprogress MEMBER mUploadProgressCb)
+    Q_PROPERTY(QJSValue onreadystatechange MEMBER mOnReadyStateCb)
+    Q_PROPERTY(QJSValue onredirected MEMBER mRedirectedCb)
+    Q_PROPERTY(QJSValue onaborted MEMBER mAbortedCb)
+    Q_PROPERTY(QJSValue ontimeout MEMBER mTimeoutCb)
+    Q_PROPERTY(QJSValue onerror MEMBER mErrorCb)
 
     using QNetworkAccessManagerPtr = QSharedPointer<QNetworkAccessManager>;
 
@@ -77,15 +76,20 @@ public:
         CUSTOM,
     };
 
+    enum class State: uchar {
+        Unsent = 0,
+        Opened,
+        HeadersReceived,
+        Loading,
+        Done
+    };
+    Q_ENUM(State);
+
     explicit Request(QObject* parent = nullptr);
     Request(QNetworkAccessManagerPtr nam, int timeout = 0,
         QObject* parent = nullptr);
     virtual ~Request();
 
-    Q_INVOKABLE bool isOpen() const
-    {
-        return mMethod != Method::INVALID && mNRequest.url().isValid();
-    }
 
     Q_INVOKABLE void open(const QString& method, const QUrl& url);
     Q_INVOKABLE void setRequestHeader(
@@ -94,6 +98,8 @@ public:
     Q_INVOKABLE void abort();
     Q_INVOKABLE void destroy();
 
+    bool isOpen() const;
+
     QByteArray requestHeader(const QByteArray& header) const;
 
     void setNetworkAccessManager(QNetworkAccessManagerPtr nam);
@@ -101,6 +107,8 @@ public:
 
     void setTimeout(int timeout);
     int timeout() const { return mNRequest.transferTimeout(); }
+
+    State readyState() const {return mState; }
 
     // Response's values methods
     QVariant response() const;
@@ -124,6 +132,7 @@ private:
     void setupReplyConnections();
 
 private slots:
+    void onReplyReadReady();
     void onReplyFinished();
     void onReplyErrorOccured(int error);
     void onReplyRedirected(const QUrl& url);
@@ -135,17 +144,18 @@ private:
     QNetworkRequest mNRequest;
     QNetworkReply* mNReply;
     QByteArray mMethodName;
-    Method mMethod;
 
+    State mState;
+    Method mMethod;
     Response mResponse;
 
-    QJSValue mDownloadProgressChangedCallback;
-    QJSValue mUploadProgressChangedCallback;
-    QJSValue mRedirectedCallback;
-    QJSValue mFinishedCallback;
-    QJSValue mAbortedCallback;
-    QJSValue mTimeoutCallback;
-    QJSValue mErrorCallback;
+    QJSValue mDownloadProgressCb;
+    QJSValue mUploadProgressCb;
+    QJSValue mReadyStateCb;
+    QJSValue mRedirectedCb;
+    QJSValue mAbortedCb;
+    QJSValue mTimeoutCb;
+    QJSValue mErrorCb;
 };
 
 }
