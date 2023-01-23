@@ -134,6 +134,8 @@ private:
 
     void setupReplyConnections();
 
+    void callCallback(QJSValue cb, const QJSValueList &args = QJSValueList());
+
 private slots:
     void onReplyReadReady();
     void onReplyFinished();
