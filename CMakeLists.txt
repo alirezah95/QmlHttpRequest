@@ -8,7 +8,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(PARENT_PROJECT_NAME "${PROJECT_NAME}")
 
 set(PROJECT_NAME "QmlHttpRequest")
-set(PROJECT_VERSION_MAJOR 1)
+set(PROJECT_VERSION_MAJOR 0)
 set(PROJECT_VERSION_MINOR 4)
 set(PROJECT_VERSION_PATCH 1)
 set(PROJECT_VERSION_TWEAK 0)
@@ -40,12 +40,21 @@ include_directories(
 )
 
 if(QT_VERSION_MAJOR EQUAL 6)
+    # For Qt 6.2.x and Qt 6.3.x, major version in qt_add_qml_module() must be
+    # greater than zero otherwise module is not registered
+    set(MODULE_VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
+    if (QT_VERSION_MINOR EQUAL 2 OR QT_VERSION_MINOR EQUAL 3)
+        if (MODULE_VERSION_MAJOR EQUAL 0)
+            set(MODULE_VERSION_MAJOR 1)
+        endif()
+    endif()
+
     qt_add_qml_module(${PROJECT_NAME}
         URI "QmlHttpRequest"
         SHARED
         OUTPUT_DIRECTORY
             ${CMAKE_BINARY_DIR}/QmlHttpRequest
-        VERSION ${PROJECT_VERSION}
+        VERSION ${MODULE_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
         SOURCES
             src/qmlhttprequest_global.hpp
             src/request.hpp src/request.cpp
