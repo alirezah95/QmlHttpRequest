@@ -105,6 +105,8 @@ void Request::setRequestHeader(const QString& header, const QString& value)
  */
 void Request::send(const QVariant& body)
 {
+    mNRequest.setAttribute(QNetworkRequest::RedirectPolicyAttribute,
+                           QNetworkRequest::ManualRedirectPolicy);
     if (isOpen() && mNam) {
         switch (mMethod) {
         case Method::INVALID:
