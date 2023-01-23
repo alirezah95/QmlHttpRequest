@@ -90,10 +90,6 @@ public:
         QObject* parent = nullptr);
     virtual ~Request();
 
-    Q_INVOKABLE bool isOpen() const
-    {
-        return mMethod != Method::INVALID && mNRequest.url().isValid();
-    }
 
     Q_INVOKABLE void open(const QString& method, const QUrl& url);
     Q_INVOKABLE void setRequestHeader(
@@ -101,6 +97,8 @@ public:
     Q_INVOKABLE void send(const QVariant& body = QVariant());
     Q_INVOKABLE void abort();
     Q_INVOKABLE void destroy();
+
+    bool isOpen() const;
 
     QByteArray requestHeader(const QByteArray& header) const;
 

@@ -154,6 +154,11 @@ void Request::destroy()
     deleteLater();
 }
 
+bool Request::isOpen() const
+{
+    return mMethod != Method::INVALID && mNRequest.url().isValid();
+}
+
 /*!
  * \brief Request::requestHeader() Returns header value for \a header. It calls
  * \a\b QNetworkRequet::rawHeader() internally.
