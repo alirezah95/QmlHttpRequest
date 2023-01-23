@@ -56,6 +56,7 @@ class QHR_EXPORT Request : public QObject
             mDownloadProgressChangedCallback)
     Q_PROPERTY(
         QJSValue onUploadProgressChanged MEMBER mUploadProgressChangedCallback)
+    Q_PROPERTY(QJSValue onreadystatechange MEMBER mOnReadyStateChangeCallback)
     Q_PROPERTY(QJSValue onRedirected MEMBER mRedirectedCallback)
     Q_PROPERTY(QJSValue onFinished MEMBER mFinishedCallback)
     Q_PROPERTY(QJSValue onAborted MEMBER mAbortedCallback)
@@ -76,6 +77,15 @@ public:
         DELETE,
         CUSTOM,
     };
+
+    enum class State: uchar {
+        Unsent = 0,
+        Opened,
+        HeadersReceived,
+        Loading,
+        Done
+    };
+    Q_ENUM(State);
 
     explicit Request(QObject* parent = nullptr);
     Request(QNetworkAccessManagerPtr nam, int timeout = 0,
@@ -124,6 +134,7 @@ private:
     void setupReplyConnections();
 
 private slots:
+    void onReplyReadReady();
     void onReplyFinished();
     void onReplyErrorOccured(int error);
     void onReplyRedirected(const QUrl& url);
@@ -135,12 +146,14 @@ private:
     QNetworkRequest mNRequest;
     QNetworkReply* mNReply;
     QByteArray mMethodName;
-    Method mMethod;
 
+    State mState;
+    Method mMethod;
     Response mResponse;
 
     QJSValue mDownloadProgressChangedCallback;
     QJSValue mUploadProgressChangedCallback;
+    QJSValue mOnReadyStateChangeCallback;
     QJSValue mRedirectedCallback;
     QJSValue mFinishedCallback;
     QJSValue mAbortedCallback;

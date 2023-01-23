@@ -77,6 +77,8 @@ void Request::open(const QString& method, const QUrl& url)
     } else {
         mMethod = Method::CUSTOM;
     }
+
+    mState = State::Opened;
     mNRequest.setUrl(url);
 }
 
@@ -414,6 +416,7 @@ void Request::multipartAddValue(
  */
 void Request::setupReplyConnections()
 {
+    connect(mNReply, &QNetworkReply::readyRead, this, &Request::onReplyReadReady);
     connect(mNReply, &QNetworkReply::finished, this, &Request::onReplyFinished);
 
     connect(mNReply, &QNetworkReply::errorOccurred, this,
@@ -426,7 +429,21 @@ void Request::setupReplyConnections()
         &Request::onReplyDownloadProgress);
 
     connect(mNReply, &QNetworkReply::uploadProgress, this,
-        &Request::onReplyUploadProgress);
+            &Request::onReplyUploadProgress);
+}
+
+void Request::onReplyReadReady()
+{
+    mResponse.status
+        = mNReply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+    mResponse.statusText
+        = mNReply->attribute(QNetworkRequest::HttpReasonPhraseAttribute)
+              .toString();
+
+    if (mState < State::HeadersReceived) {
+        mState = State::HeadersReceived;
+        // Call onreadystatuchange callback
+    }
 }
 
 /*!
@@ -435,34 +452,36 @@ void Request::setupReplyConnections()
  */
 void Request::onReplyFinished()
 {
+    mState = State::Done;
+
+    // Store mNReply results inside mReponse and delete mNReply
+    if (mNReply->error() == QNetworkReply::NoError) {
+        mResponse.response = QVariant();
+        mResponse.responseUrl = QUrl();
+        mResponse.responseType = "text";
+    } else {
+        mResponse.response = mNReply->readAll();
+        mResponse.responseUrl = mNReply->url();
+        mResponse.responseType = mNReply->rawHeader("Content-Type");
+    }
+
+    if (QVariant status
+        = mNReply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+        status.isValid()) {
+        mResponse.status = status.toInt();
+        mResponse.statusText
+            = mNReply->attribute(QNetworkRequest::HttpReasonPhraseAttribute)
+                  .toString();
+    } else {
+        mResponse.status = 0;
+        mResponse.statusText = "";
+    }
+    mResponse.responseText = mNReply->readAll();
+
+    mNReply->deleteLater();
+    mNReply = nullptr;
+
     if (mFinishedCallback.isCallable()) {
-        // Store mNReply results inside mReponse and delete mNReply
-        if (mNReply->error() == QNetworkReply::NoError) {
-            mResponse.response = QVariant();
-            mResponse.responseUrl = QUrl();
-            mResponse.responseType = "text";
-        } else {
-            mResponse.response = mNReply->readAll();
-            mResponse.responseUrl = mNReply->url();
-            mResponse.responseType = mNReply->rawHeader("Content-Type");
-        }
-
-        if (QVariant status
-            = mNReply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
-            status.isValid()) {
-            mResponse.status = status.toInt();
-            mResponse.statusText
-                = mNReply->attribute(QNetworkRequest::HttpReasonPhraseAttribute)
-                      .toString();
-        } else {
-            mResponse.status = 0;
-            mResponse.statusText = "";
-        }
-        mResponse.responseText = mNReply->readAll();
-
-        mNReply->deleteLater();
-        mNReply = nullptr;
-
         auto result = mFinishedCallback.call();
         if (result.isError()) {
             qDebug("%s:%s: %s",
