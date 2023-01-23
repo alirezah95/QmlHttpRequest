@@ -79,7 +79,7 @@ void Request::open(const QString& method, const QUrl& url)
     }
 
     mState = State::Opened;
-    mNRequest.setUrl(url);
+    mUrl = url;
 }
 
 /*!
@@ -105,8 +105,15 @@ void Request::setRequestHeader(const QString& header, const QString& value)
  */
 void Request::send(const QVariant& body)
 {
+    if (mNReply) {
+        abort();
+    }
+
     mNRequest.setAttribute(QNetworkRequest::RedirectPolicyAttribute,
                            QNetworkRequest::ManualRedirectPolicy);
+    mNRequest.setUrl(mUrl);
+    mBody = body;
+
     if (isOpen() && mNam) {
         switch (mMethod) {
         case Method::INVALID:
@@ -125,7 +132,7 @@ void Request::send(const QVariant& body)
             if (body.isNull() || !body.isValid()) {
                 sendNoBodyRequest();
             } else {
-                sendBodyRequest(body);
+                sendBodyRequest(mBody);
             }
         }
 
@@ -158,7 +165,7 @@ void Request::destroy()
 
 bool Request::isOpen() const
 {
-    return mMethod != Method::INVALID && mNRequest.url().isValid();
+    return mMethod != Method::INVALID && mUrl.isValid();
 }
 
 /*!
@@ -474,13 +481,38 @@ void Request::onReplyReadReady()
  */
 void Request::onReplyFinished()
 {
+    QVariant redirect
+        = mNReply->attribute(QNetworkRequest::RedirectionTargetAttribute);
+    if (redirect.isValid()) {
+        QUrl url = mNReply->url().resolved(redirect.toUrl());
+        if (!url.isLocalFile()) {
+            // See http://www.ietf.org/rfc/rfc2616.txt, section 10.3.4 "303 See
+            // Other": Result of 303 redirection should be a new "GET" request.
+            const QVariant code = mNReply->attribute(
+                QNetworkRequest::HttpStatusCodeAttribute);
+            int codeInt = code.toInt();
+            if (code.isValid() && codeInt == 303 && mMethodName != "GET") {
+                mMethodName = "GET";
+                mMethod = Method::GET;
+            }
+            mNReply->disconnect();
+
+            mUrl = url;
+
+            send(mBody);
+            return;
+        }
+    }
+
     // Store mNReply results inside mReponse and delete mNReply
-    if (mNReply->error() == QNetworkReply::NoError) {
-        mResponse.response = QVariant();
+    if (mNReply->error() != QNetworkReply::NoError) {
+        mResponse.response = QVariantMap();
+        mResponse.responseText = "";
         mResponse.responseUrl = QUrl();
         mResponse.responseType = "text";
     } else {
-        mResponse.response = mNReply->readAll();
+        mResponse.response = QVariantMap();
+        mResponse.responseText = mNReply->readAll();
         mResponse.responseUrl = mNReply->url();
         mResponse.responseType = mNReply->rawHeader("Content-Type");
     }
@@ -490,7 +522,6 @@ void Request::onReplyFinished()
     mResponse.statusText
         = mNReply->attribute(QNetworkRequest::HttpReasonPhraseAttribute)
               .toString();
-    mResponse.responseText = mNReply->readAll();
 
     mNReply->deleteLater();
     mNReply = nullptr;

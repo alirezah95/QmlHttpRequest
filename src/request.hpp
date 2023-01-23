@@ -149,6 +149,8 @@ private:
     QNetworkRequest mNRequest;
     QNetworkReply* mNReply;
     QByteArray mMethodName;
+    QVariant mBody;
+    QUrl mUrl;
 
     State mState;
     Method mMethod;
