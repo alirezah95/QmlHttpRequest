@@ -136,7 +136,7 @@ private:
 
     void callCallback(QJSValue cb, const QJSValueList &args = QJSValueList());
 
-private slots:
+private:
     void onReplyReadReady();
     void onReplyFinished();
     void onReplyErrorOccured(int error);
