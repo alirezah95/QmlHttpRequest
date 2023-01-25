@@ -38,28 +38,28 @@ class QHttpMultiPart;
 
 namespace qhr {
 
-
 class QHR_EXPORT Request : public QObject
 {
     Q_OBJECT
     QML_ELEMENT
     // Response properties
-    Q_PROPERTY(QVariant response READ response CONSTANT)
-    Q_PROPERTY(QString responseText READ responseText CONSTANT)
-    Q_PROPERTY(QString responseType READ responseType CONSTANT)
-    Q_PROPERTY(QUrl responseUrl READ responseUrl CONSTANT)
-    Q_PROPERTY(QString statusText READ statusText CONSTANT)
-    Q_PROPERTY(int status READ status CONSTANT)
+    Q_PROPERTY(QVariant response        READ response       CONSTANT)
+    Q_PROPERTY(QString  responseText    READ responseText   CONSTANT)
+    Q_PROPERTY(QString  responseType    READ responseType   CONSTANT)
+    Q_PROPERTY(QUrl     responseUrl     READ responseUrl    CONSTANT)
+    Q_PROPERTY(QString  statusText      READ statusText     CONSTANT)
+    Q_PROPERTY(int      status          READ status         CONSTANT)
     // Request properties
-    Q_PROPERTY(State readyState READ readyState() CONSTANT)
-    Q_PROPERTY(int timeout READ timeout WRITE setTimeout)
-    Q_PROPERTY(QJSValue ondownloadprogress MEMBER mDownloadProgressCb)
-    Q_PROPERTY(QJSValue onuploadprogress MEMBER mUploadProgressCb)
-    Q_PROPERTY(QJSValue onreadystatechange MEMBER mOnReadyStateCb)
-    Q_PROPERTY(QJSValue onredirected MEMBER mRedirectedCb)
-    Q_PROPERTY(QJSValue onaborted MEMBER mAbortedCb)
-    Q_PROPERTY(QJSValue ontimeout MEMBER mTimeoutCb)
-    Q_PROPERTY(QJSValue onerror MEMBER mErrorCb)
+    Q_PROPERTY(int      timeout     READ    timeout WRITE setTimeout)
+    Q_PROPERTY(State    readyState  READ    readyState() CONSTANT)
+
+    Q_PROPERTY(QJSValue ondownloadprogress  MEMBER  mDownloadProgressCb)
+    Q_PROPERTY(QJSValue onuploadprogress    MEMBER  mUploadProgressCb)
+    Q_PROPERTY(QJSValue onreadystatechange  MEMBER  mReadyStateCb)
+    Q_PROPERTY(QJSValue onredirected        MEMBER  mRedirectedCb)
+    Q_PROPERTY(QJSValue onaborted           MEMBER  mAbortedCb)
+    Q_PROPERTY(QJSValue ontimeout           MEMBER  mTimeoutCb)
+    Q_PROPERTY(QJSValue onerror             MEMBER  mErrorCb)
 
     using QNetworkAccessManagerPtr = QSharedPointer<QNetworkAccessManager>;
 
@@ -76,7 +76,8 @@ public:
         CUSTOM,
     };
 
-    enum class State: uchar {
+    enum class State : uchar
+    {
         Unsent = 0,
         Opened,
         HeadersReceived,
@@ -89,7 +90,6 @@ public:
     Request(QNetworkAccessManagerPtr nam, int timeout = 0,
         QObject* parent = nullptr);
     virtual ~Request();
-
 
     Q_INVOKABLE void open(const QString& method, const QUrl& url);
     Q_INVOKABLE void setRequestHeader(
@@ -108,7 +108,7 @@ public:
     void setTimeout(int timeout);
     int timeout() const { return mNRequest.transferTimeout(); }
 
-    State readyState() const {return mState; }
+    State readyState() const { return mState; }
 
     // Response's values methods
     QVariant response() const;
@@ -125,13 +125,18 @@ private:
     void sendBodyRequestText(const QVariant& body);
     void sendBodyRequestMultipart(const QVariant& body);
 
-    void multipartAddObject(QHttpMultiPart* mpBody, QString prefix, const QJsonObject& object);
-    void multipartAddArray(QHttpMultiPart* mpBody, QString prefix, const QJsonArray& array);
-    void multipartAddValue(QHttpMultiPart* mpBody, QString prefix, const QJsonValue& value);
+    void multipartAddObject(
+        QHttpMultiPart* mpBody, QString prefix, const QJsonObject& object);
+    void multipartAddArray(
+        QHttpMultiPart* mpBody, QString prefix, const QJsonArray& array);
+    void multipartAddValue(
+        QHttpMultiPart* mpBody, QString prefix, const QJsonValue& value);
 
     void setupReplyConnections();
 
-private slots:
+    void callCallback(QJSValue cb, const QJSValueList &args = QJSValueList());
+
+private:
     void onReplyReadReady();
     void onReplyFinished();
     void onReplyErrorOccured(int error);
@@ -144,6 +149,8 @@ private:
     QNetworkRequest mNRequest;
     QNetworkReply* mNReply;
     QByteArray mMethodName;
+    QVariant mBody;
+    QUrl mUrl;
 
     State mState;
     Method mMethod;
