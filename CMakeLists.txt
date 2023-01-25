@@ -64,13 +64,10 @@ if(QT_VERSION_MAJOR EQUAL 6)
 
     target_compile_definitions(QmlHttpRequest PRIVATE QMLHTTPREQUEST_LIBRARY)
 
-    # This is required on Windows and MSVC so this is correctly linked to parent project
     target_link_directories(${PARENT_PROJECT_NAME} PRIVATE
         ${CMAKE_CURRENT_BINARY_DIR}
         ${CMAKE_BINARY_DIR}/QmlHttpRequest
     )
-
-    # Next line is required for Qml Preview on Linux to be able to load the module
     target_link_libraries(${PARENT_PROJECT_NAME} PRIVATE
         ${PROJECT_NAME}
     )
@@ -79,7 +76,7 @@ else()
 
     find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Network Qml)
 
-    add_library(${PROJECT_NAME} SHARED
+    add_library(${PROJECT_NAME} OBJECT
         src/qmlhttprequest_global.hpp
         src/request.hpp src/request.cpp
         src/qmlhttprequest.hpp src/qmlhttprequest.cpp
@@ -92,6 +89,10 @@ else()
         Qt${QT_VERSION_MAJOR}::Core
         Qt${QT_VERSION_MAJOR}::Network
         Qt${QT_VERSION_MAJOR}::Qml
+    )
+
+    target_link_libraries(${PARENT_PROJECT_NAME} PRIVATE
+        $<TARGET_OBJECTS:${PROJECT_NAME}>
     )
 endif()
 
