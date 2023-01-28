@@ -505,16 +505,15 @@ void Request::onReplyFinished()
     }
 
     // Store mNReply results inside mReponse and delete mNReply
-    if (mNReply->error() != QNetworkReply::NoError) {
-        mResponse.response = QVariantMap();
-        mResponse.responseText = "";
-        mResponse.responseUrl = QUrl();
-        mResponse.responseType = "text";
-    } else {
+    if (mNReply->error() == QNetworkReply::NoError) {
         mResponse.response = QVariantMap();
         mResponse.responseText = mNReply->readAll();
         mResponse.responseUrl = mNReply->url();
         mResponse.responseType = mNReply->rawHeader("Content-Type");
+    } else {
+        mResponse.response = QVariantMap();
+        mResponse.responseText = mNReply->readAll();
+        mResponse.responseUrl = mNReply->url();
     }
 
     mResponse.status
