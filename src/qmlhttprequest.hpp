@@ -51,7 +51,16 @@ public:
         UserVerifiedRedirectPolicy
         = QNetworkRequest::UserVerifiedRedirectPolicy,
     };
-    Q_ENUM(RedirectPolicy)
+    Q_ENUM(RedirectPolicy);
+
+    enum State: uchar {
+        Unsent          = uchar(qhr::Request::State::Unsent),
+        Opened          = uchar(qhr::Request::State::Opened),
+        HeadersReceived = uchar(qhr::Request::State::HeadersReceived),
+        Loading         = uchar(qhr::Request::State::Loading),
+        Done            = uchar(qhr::Request::State::Done),
+    };
+    Q_ENUM(State);
 
 public:
     static QmlHttpRequest& singleton();

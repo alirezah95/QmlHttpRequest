@@ -47,13 +47,7 @@ Request::Request(QNetworkAccessManagerPtr nam, int timeout, QObject* parent)
 
 Request::~Request()
 {
-    if (mNReply) {
-        if (mNReply->isRunning()) {
-            mNReply->abort();
-        }
-
-        mNReply->deleteLater();
-    }
+    abort();
 }
 
 /*!
@@ -83,7 +77,9 @@ void Request::open(const QString& method, const QUrl& url)
     } else {
         mMethod = Method::CUSTOM;
     }
-    mNRequest.setUrl(url);
+
+    mState = State::Opened;
+    mUrl = url;
 }
 
 /*!
@@ -109,6 +105,15 @@ void Request::setRequestHeader(const QString& header, const QString& value)
  */
 void Request::send(const QVariant& body)
 {
+    if (mNReply) {
+        abort();
+    }
+
+    mNRequest.setAttribute(QNetworkRequest::RedirectPolicyAttribute,
+                           QNetworkRequest::ManualRedirectPolicy);
+    mNRequest.setUrl(mUrl);
+    mBody = body;
+
     if (isOpen() && mNam) {
         switch (mMethod) {
         case Method::INVALID:
@@ -127,7 +132,7 @@ void Request::send(const QVariant& body)
             if (body.isNull() || !body.isValid()) {
                 sendNoBodyRequest();
             } else {
-                sendBodyRequest(body);
+                sendBodyRequest(mBody);
             }
         }
 
@@ -136,6 +141,31 @@ void Request::send(const QVariant& body)
             setupReplyConnections();
         }
     }
+}
+
+void Request::abort()
+{
+    if (mNReply) {
+        if (mNReply->isRunning()) {
+            mNReply->abort();
+        }
+
+        mNReply->deleteLater();
+
+        mResponse.status = 0;
+        mResponse.statusText = "";
+        mResponse.responseText = "{ \"detail\": \"Operation aborted\" }";
+    }
+}
+
+void Request::destroy()
+{
+    deleteLater();
+}
+
+bool Request::isOpen() const
+{
+    return mMethod != Method::INVALID && mUrl.isValid();
 }
 
 /*!
@@ -400,6 +430,7 @@ void Request::multipartAddValue(
  */
 void Request::setupReplyConnections()
 {
+    connect(mNReply, &QNetworkReply::readyRead, this, &Request::onReplyReadReady);
     connect(mNReply, &QNetworkReply::finished, this, &Request::onReplyFinished);
 
     connect(mNReply, &QNetworkReply::errorOccurred, this,
@@ -412,7 +443,36 @@ void Request::setupReplyConnections()
         &Request::onReplyDownloadProgress);
 
     connect(mNReply, &QNetworkReply::uploadProgress, this,
-        &Request::onReplyUploadProgress);
+            &Request::onReplyUploadProgress);
+}
+
+void Request::callCallback(QJSValue cb, const QJSValueList& args)
+{
+    if (cb.isCallable()) {
+        QJSValue result = cb.call(args);
+
+        if (result.isError()) {
+            qDebug("%s:%s: %s",
+                qPrintable(result.property("fileName").toString()),
+                qPrintable(result.property("lineNumber").toString()),
+                qPrintable(result.toString().toStdString().c_str()));
+        }
+    }
+}
+
+void Request::onReplyReadReady()
+{
+    mResponse.status
+        = mNReply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+    mResponse.statusText
+        = mNReply->attribute(QNetworkRequest::HttpReasonPhraseAttribute)
+              .toString();
+
+    if (mState < State::HeadersReceived) {
+        mState = State::HeadersReceived;
+        // Call onreadystatuchange callback
+        callCallback(mReadyStateCb);
+    }
 }
 
 /*!
@@ -421,36 +481,54 @@ void Request::setupReplyConnections()
  */
 void Request::onReplyFinished()
 {
-    if (mFinishedCallback.isCallable()) {
-        // Store mNReply results inside mReponse and delete mNReply
-        if (mNReply->error() == QNetworkReply::NoError) {
-            mResponse.response = QVariant();
-            mResponse.responseUrl = QUrl();
-            mResponse.responseType = "text";
-        } else {
-            mResponse.response = mNReply->readAll();
-            mResponse.responseUrl = mNReply->url();
-            mResponse.responseType = mNReply->rawHeader("Content-Type");
+    QVariant redirect
+        = mNReply->attribute(QNetworkRequest::RedirectionTargetAttribute);
+    if (redirect.isValid()) {
+        QUrl url = mNReply->url().resolved(redirect.toUrl());
+        if (!url.isLocalFile()) {
+            // See http://www.ietf.org/rfc/rfc2616.txt, section 10.3.4 "303 See
+            // Other": Result of 303 redirection should be a new "GET" request.
+            const QVariant code = mNReply->attribute(
+                QNetworkRequest::HttpStatusCodeAttribute);
+            int codeInt = code.toInt();
+            if (code.isValid() && codeInt == 303 && mMethodName != "GET") {
+                mMethodName = "GET";
+                mMethod = Method::GET;
+            }
+            mNReply->disconnect();
+
+            mUrl = url;
+
+            send(mBody);
+            return;
         }
-
-        if (QVariant status
-            = mNReply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
-            status.isValid()) {
-            mResponse.status = status.toInt();
-            mResponse.statusText
-                = mNReply->attribute(QNetworkRequest::HttpReasonPhraseAttribute)
-                      .toString();
-        } else {
-            mResponse.status = 0;
-            mResponse.statusText = "";
-        }
-        mResponse.responseText = mNReply->readAll();
-
-        mNReply->deleteLater();
-        mNReply = nullptr;
-
-        mFinishedCallback.call();
     }
+
+    // Store mNReply results inside mReponse and delete mNReply
+    if (mNReply->error() == QNetworkReply::NoError) {
+        mResponse.response = QVariantMap();
+        mResponse.responseText = mNReply->readAll();
+        mResponse.responseUrl = mNReply->url();
+        mResponse.responseType = mNReply->rawHeader("Content-Type");
+    } else {
+        mResponse.response = QVariantMap();
+        mResponse.responseText = mNReply->readAll();
+        mResponse.responseUrl = mNReply->url();
+    }
+
+    mResponse.status
+        = mNReply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+    mResponse.statusText
+        = mNReply->attribute(QNetworkRequest::HttpReasonPhraseAttribute)
+              .toString();
+
+    mNReply->deleteLater();
+    mNReply = nullptr;
+
+    mState = State::Done;
+
+    // Call ready state callback
+    callCallback(mReadyStateCb);
 }
 
 /*!
@@ -462,22 +540,25 @@ void Request::onReplyErrorOccured(int error)
 {
     if (mNReply->error() == QNetworkReply::TimeoutError) {
         // If time out is reached only call timeout callback
-        if (mTimeoutCallback.isCallable()) {
-            mTimeoutCallback.call();
+        if (mTimeoutCb.isCallable()) {
+            // Call timeout callback
+            callCallback(mTimeoutCb);
             return;
         }
     }
 
     if (mNReply->error() == QNetworkReply::OperationCanceledError) {
         // If operation was aborted
-        if (mAbortedCallback.isCallable()) {
-            mAbortedCallback.call();
+        if (mAbortedCb.isCallable()) {
+            // Call aborted callback
+            callCallback(mAbortedCb);
             return;
         }
     }
 
-    if (mErrorCallback.isCallable()) {
-        mErrorCallback.call({
+    if (mErrorCb.isCallable()) {
+        // Call error callback
+        callCallback(mErrorCb, {
             mNReply->error(),
             mNReply->errorString(),
         });
@@ -491,11 +572,10 @@ void Request::onReplyErrorOccured(int error)
  */
 void Request::onReplyRedirected(const QUrl& url)
 {
-    if (mRedirectedCallback.isCallable()) {
-        mRedirectedCallback.call({
+    callCallback(mRedirectedCb,
+        {
             url.toString(),
         });
-    }
 }
 
 /*!
@@ -505,12 +585,11 @@ void Request::onReplyRedirected(const QUrl& url)
  */
 void Request::onReplyDownloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 {
-    if (mDownloadProgressChangedCallback.isCallable()) {
-        mDownloadProgressChangedCallback.call({
+    callCallback(mDownloadProgressCb,
+        {
             double(bytesReceived),
             double(bytesTotal),
         });
-    }
 }
 
 /*!
@@ -520,12 +599,11 @@ void Request::onReplyDownloadProgress(qint64 bytesReceived, qint64 bytesTotal)
  */
 void Request::onReplyUploadProgress(qint64 bytesSent, qint64 bytesTotal)
 {
-    if (mUploadProgressChangedCallback.isCallable()) {
-        mUploadProgressChangedCallback.call({
+    callCallback(mUploadProgressCb,
+        {
             double(bytesSent),
             double(bytesTotal),
         });
-    }
 }
 
 }
