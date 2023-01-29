@@ -43,10 +43,8 @@ if(QT_VERSION_MAJOR EQUAL 6)
     # For Qt 6.2.x and Qt 6.3.x, major version in qt_add_qml_module() must be
     # greater than zero otherwise module is not registered
     set(MODULE_VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
-    if (QT_VERSION_MINOR EQUAL 2 OR QT_VERSION_MINOR EQUAL 3)
-        if (MODULE_VERSION_MAJOR EQUAL 0)
-            set(MODULE_VERSION_MAJOR 1)
-        endif()
+    if (MODULE_VERSION_MAJOR EQUAL 0)
+        set(MODULE_VERSION_MAJOR 1)
     endif()
 
     qt_add_qml_module(${PROJECT_NAME}
