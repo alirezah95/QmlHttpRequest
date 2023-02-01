@@ -404,7 +404,7 @@ void Request::multipartAddValue(
             part.setHeader(QNetworkRequest::ContentTypeHeader, mimeType.name());
             part.setHeader(QNetworkRequest::ContentDispositionHeader,
                 QString("form-data; name=\"" + prefix + "\"; filename=\"%1\"")
-                    .arg(file->fileName()));
+                    .arg(url.fileName()));
             part.setBodyDevice(file);
 
             // Set file parent to mpBody so it deleted automatically
