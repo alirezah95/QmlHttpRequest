@@ -139,8 +139,6 @@ void Request::abort()
             mNReply->abort();
         }
 
-        mNReply->deleteLater();
-
         mResponse.status = 0;
         mResponse.statusText = "";
         mResponse.responseText = "{ \"detail\": \"Operation aborted\" }";
