@@ -27,8 +27,8 @@ namespace qhr {
  * \param parent
  */
 Request::Request(QNetworkAccessManagerPtr nam, int timeout)
+    : mNam(nam), mMethodName(""), mMethod(Method::INVALID), mNReply(nullptr)
 {
-    mNam = nam;
     if (timeout != 0) {
         mNRequest.setTransferTimeout(timeout);
     }
