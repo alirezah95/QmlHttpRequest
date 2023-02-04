@@ -86,9 +86,7 @@ public:
     };
     Q_ENUM(State);
 
-    explicit Request(QObject* parent = nullptr);
-    Request(QNetworkAccessManagerPtr nam, int timeout = 0,
-        QObject* parent = nullptr);
+    Request(QNetworkAccessManagerPtr nam, int timeout = 0);
     virtual ~Request();
 
     Q_INVOKABLE void open(const QString& method, const QUrl& url);
@@ -96,7 +94,6 @@ public:
         const QString& header, const QString& value);
     Q_INVOKABLE void send(const QVariant& body = QVariant());
     Q_INVOKABLE void abort();
-    Q_INVOKABLE void destroy();
 
     bool isOpen() const;
 

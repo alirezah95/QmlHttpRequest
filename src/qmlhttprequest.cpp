@@ -44,7 +44,7 @@ QmlHttpRequest::QmlHttpRequest(QObject* parent)
  */
 Request* QmlHttpRequest::newRequest()
 {
-    return new Request(mNam, mNam->transferTimeout(), this);
+    return new Request(mNam);
 }
 
 /*!
