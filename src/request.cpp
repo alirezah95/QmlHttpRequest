@@ -101,6 +101,8 @@ void Request::send(const QVariant& body)
     mNRequest.setAttribute(QNetworkRequest::RedirectPolicyAttribute,
                            QNetworkRequest::ManualRedirectPolicy);
     mNRequest.setUrl(mUrl);
+    mNRequest.setMaximumRedirectsAllowed(15);
+
     mBody = body;
 
     if (isOpen() && mNam) {
