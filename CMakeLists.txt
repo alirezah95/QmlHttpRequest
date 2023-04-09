@@ -74,7 +74,7 @@ else()
 
     find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Network Qml)
 
-    add_library(${PROJECT_NAME} OBJECT
+    add_library(${PROJECT_NAME} SHARED
         src/qmlhttprequest_global.hpp
         src/request.hpp src/request.cpp
         src/qmlhttprequest.hpp src/qmlhttprequest.cpp
@@ -83,14 +83,14 @@ else()
 
     target_compile_definitions(${PROJECT_NAME} PRIVATE QMLHTTPREQUEST_LIBRARY)
 
-    target_link_libraries(${PROJECT_NAME} PRIVATE
+    target_link_libraries(${PROJECT_NAME} PUBLIC
         Qt${QT_VERSION_MAJOR}::Core
         Qt${QT_VERSION_MAJOR}::Network
         Qt${QT_VERSION_MAJOR}::Qml
     )
 
     target_link_libraries(${PARENT_PROJECT_NAME} PRIVATE
-        $<TARGET_OBJECTS:${PROJECT_NAME}>
+        ${PROJECT_NAME}
     )
 endif()
 
