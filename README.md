@@ -9,11 +9,12 @@ To include [QmlHttpRequest](https://github.com/alirezah95/QmlHttpRequest), clone
 
     git submodule add https://github.com/alirezah95/QmlHttpRequest
 
-add it to **CMake** as a subdirectory:
+Add it to **CMake** as a subdirectory:
 
     add_subdirectory("QmlHttpRequest")
 
-import it into Qml file and start using it!
+For ***Qt 5.x*** use `QmlHttpRequest::registerQmlHttpRequest()` method to register **QmlHttpRequest** module. Import it into Qml file and start using it!
+
 
 ## Example
 - Sending a simple **GET** or **POST** request with a body of type **application/json**
@@ -102,7 +103,9 @@ import it into Qml file and start using it!
                     "file_filed": "url-to-local-file" // Url to a file usually retrieved from  a FileDailog
                 }
 
-                qhr.send(JSON.stringify(body))
+                /* Note that for multipart the body should not be stringified and it should be in JSON form.
+                */
+                qhr.send(body)
             }
         }
     }
