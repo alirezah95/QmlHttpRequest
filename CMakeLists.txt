@@ -3,13 +3,14 @@ cmake_minimum_required(VERSION 3.24)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 # Store parent project name before setting project information
 set(PARENT_PROJECT_NAME "${PROJECT_NAME}")
 
 set(PROJECT_NAME "QmlHttpRequest")
 set(PROJECT_VERSION_MAJOR 0)
-set(PROJECT_VERSION_MINOR 5)
+set(PROJECT_VERSION_MINOR 6)
 set(PROJECT_VERSION_PATCH 0)
 set(PROJECT_VERSION_TWEAK 0)
 if (PROJECT_VERSION_TWEAK EQUAL 0)
@@ -74,7 +75,7 @@ else()
 
     find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Network Qml)
 
-    add_library(${PROJECT_NAME} OBJECT
+    add_library(${PROJECT_NAME} SHARED
         src/qmlhttprequest_global.hpp
         src/request.hpp src/request.cpp
         src/qmlhttprequest.hpp src/qmlhttprequest.cpp
@@ -83,14 +84,14 @@ else()
 
     target_compile_definitions(${PROJECT_NAME} PRIVATE QMLHTTPREQUEST_LIBRARY)
 
-    target_link_libraries(${PROJECT_NAME} PRIVATE
+    target_link_libraries(${PROJECT_NAME} PUBLIC
         Qt${QT_VERSION_MAJOR}::Core
         Qt${QT_VERSION_MAJOR}::Network
         Qt${QT_VERSION_MAJOR}::Qml
     )
 
     target_link_libraries(${PARENT_PROJECT_NAME} PRIVATE
-        $<TARGET_OBJECTS:${PROJECT_NAME}>
+        ${PROJECT_NAME}
     )
 endif()
 

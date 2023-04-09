@@ -11,6 +11,15 @@ namespace qhr {
  * can be used in QML to create a new \ref Request
  */
 
+void QmlHttpRequest::registerQmlHttpRequest()
+{
+    qmlRegisterSingletonInstance(PROJECT_NAME, PROJECT_VERSION_MAJOR,
+        PROJECT_VERSION_MINOR, "QmlHttpRequest", &QmlHttpRequest::singleton());
+    qmlRegisterUncreatableType<qhr::Request>("QmlHttpRequest",
+        PROJECT_VERSION_MAJOR, PROJECT_VERSION_MINOR, "Request",
+        "Request can not be created from QML");
+}
+
 /*!
  * \brief Returns the singleton instance of \ref QmlHttpRequest
  * \return
@@ -22,7 +31,8 @@ QmlHttpRequest& QmlHttpRequest::singleton()
 }
 
 #if QT_VERSION_MAJOR == 6
-QmlHttpRequest* QmlHttpRequest::create(QQmlEngine* qmlEngine, QJSEngine* jsEngine)
+QmlHttpRequest* QmlHttpRequest::create(
+    QQmlEngine* qmlEngine, QJSEngine* jsEngine)
 {
     auto instance = &QmlHttpRequest::singleton();
     QJSEngine::setObjectOwnership(instance, QJSEngine::CppOwnership);
@@ -44,7 +54,7 @@ QmlHttpRequest::QmlHttpRequest(QObject* parent)
  */
 Request* QmlHttpRequest::newRequest()
 {
-    return new Request(mNam, mNam->transferTimeout(), this);
+    return new Request(mNam);
 }
 
 /*!
@@ -71,18 +81,5 @@ QmlHttpRequest::RedirectPolicy QmlHttpRequest::redirectPolicy() const
 {
     return RedirectPolicy(mNam->redirectPolicy());
 }
-
-#if QT_VERSION_MAJOR == 5
-void registerQmlHttpRequestMethods()
-{
-    qmlRegisterSingletonInstance(PROJECT_NAME, PROJECT_VERSION_MAJOR,
-        PROJECT_VERSION_MINOR, "QmlHttpRequest", &QmlHttpRequest::singleton());
-    qmlRegisterUncreatableType<qhr::Request>("QmlHttpRequest",
-        PROJECT_VERSION_MAJOR, PROJECT_VERSION_MINOR, "Request",
-        "Request can not be created from QML");
-}
-
-Q_COREAPP_STARTUP_FUNCTION(registerQmlHttpRequestMethods)
-#endif
 
 }

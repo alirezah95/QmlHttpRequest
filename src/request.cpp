@@ -20,26 +20,15 @@ namespace qhr {
  */
 
 /*!
- * \brief Create an invalid, not-open \ref Request object
- * \param parent
- */
-Request::Request(QObject* parent)
-    : QObject { parent }, mNam(QNetworkAccessManagerPtr()), mMethodName(""),
-      mMethod(Method::INVALID), mNReply(nullptr)
-{
-}
-
-/*!
  * \brief Initialize an object of this calss inject \a nam as \a\b
  * QNetworkAccessManager and \a timeout for transfert timeout
  * \param nam
  * \param timeout
  * \param parent
  */
-Request::Request(QNetworkAccessManagerPtr nam, int timeout, QObject* parent)
-    : Request(parent)
+Request::Request(QNetworkAccessManagerPtr nam, int timeout)
+    : mNam(nam), mMethodName(""), mMethod(Method::INVALID), mNReply(nullptr)
 {
-    mNam = nam;
     if (timeout != 0) {
         mNRequest.setTransferTimeout(timeout);
     }
@@ -112,6 +101,8 @@ void Request::send(const QVariant& body)
     mNRequest.setAttribute(QNetworkRequest::RedirectPolicyAttribute,
                            QNetworkRequest::ManualRedirectPolicy);
     mNRequest.setUrl(mUrl);
+    mNRequest.setMaximumRedirectsAllowed(15);
+
     mBody = body;
 
     if (isOpen() && mNam) {
@@ -150,17 +141,10 @@ void Request::abort()
             mNReply->abort();
         }
 
-        mNReply->deleteLater();
-
         mResponse.status = 0;
         mResponse.statusText = "";
         mResponse.responseText = "{ \"detail\": \"Operation aborted\" }";
     }
-}
-
-void Request::destroy()
-{
-    deleteLater();
 }
 
 bool Request::isOpen() const
@@ -404,7 +388,7 @@ void Request::multipartAddValue(
             part.setHeader(QNetworkRequest::ContentTypeHeader, mimeType.name());
             part.setHeader(QNetworkRequest::ContentDispositionHeader,
                 QString("form-data; name=\"" + prefix + "\"; filename=\"%1\"")
-                    .arg(file->fileName()));
+                    .arg(url.fileName()));
             part.setBodyDevice(file);
 
             // Set file parent to mpBody so it deleted automatically
