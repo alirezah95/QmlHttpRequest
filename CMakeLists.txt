@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.24)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 # Store parent project name before setting project information
 set(PARENT_PROJECT_NAME "${PROJECT_NAME}")
