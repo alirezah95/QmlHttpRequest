@@ -14,6 +14,7 @@ void Response::clear()
 {
     response = QVariant();
     responseText = QString();
+    responseContent = QByteArray();
     responseType = QString();
     responseUrl = QUrl();
     statusText = QString();

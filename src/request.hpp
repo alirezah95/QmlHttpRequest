@@ -45,6 +45,7 @@ class QHR_EXPORT Request : public QObject
     // Response properties
     Q_PROPERTY(QVariant response        READ response       CONSTANT)
     Q_PROPERTY(QString  responseText    READ responseText   CONSTANT)
+    Q_PROPERTY(QByteArray  responseContent    READ responseContent   CONSTANT)
     Q_PROPERTY(QString  responseType    READ responseType   CONSTANT)
     Q_PROPERTY(QUrl     responseUrl     READ responseUrl    CONSTANT)
     Q_PROPERTY(QString  statusText      READ statusText     CONSTANT)
@@ -110,6 +111,7 @@ public:
     // Response's values methods
     QVariant response() const;
     QString responseText() const;
+    QByteArray responseContent() const;
     auto responseType() const { return mResponse.responseType; };
     auto responseUrl() const { return mResponse.responseUrl; };
     auto statusText() const { return mResponse.statusText; };

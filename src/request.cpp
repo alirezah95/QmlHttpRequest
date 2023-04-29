@@ -144,6 +144,7 @@ void Request::abort()
         mResponse.status = 0;
         mResponse.statusText = "";
         mResponse.responseText = "{ \"detail\": \"Operation aborted\" }";
+        mResponse.responseContent = mResponse.responseText.toLocal8Bit();
     }
 }
 
@@ -210,6 +211,20 @@ QString Request::responseText() const
         return mNReply->readAll();
     }
     return mResponse.responseText;
+}
+
+/*!
+ * \brief Returns the response content of this request and an empty bytearray if request is not set or was
+ * unsuccessful
+ * \return
+ */
+QByteArray Request::responseContent() const
+{
+    if (mNReply) {
+        // Request is sent
+        return mNReply->readAll();
+    }
+    return mResponse.responseContent;
 }
 
 /*!
@@ -491,12 +506,14 @@ void Request::onReplyFinished()
     // Store mNReply results inside mReponse and delete mNReply
     if (mNReply->error() == QNetworkReply::NoError) {
         mResponse.response = QVariantMap();
-        mResponse.responseText = mNReply->readAll();
+        mResponse.responseContent = mNReply->readAll();
+        mResponse.responseText = mResponse.responseContent;
         mResponse.responseUrl = mNReply->url();
         mResponse.responseType = mNReply->rawHeader("Content-Type");
     } else {
         mResponse.response = QVariantMap();
-        mResponse.responseText = mNReply->readAll();
+        mResponse.responseContent = mNReply->readAll();
+        mResponse.responseText = mResponse.responseContent;
         mResponse.responseUrl = mNReply->url();
     }
 

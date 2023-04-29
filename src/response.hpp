@@ -37,6 +37,7 @@ public:
 public:
     QVariant    response;
     QString     responseText;
+    QByteArray     responseContent;
     QString     responseType;
     QUrl        responseUrl;
     QString     statusText;
