@@ -67,7 +67,7 @@ public:
     static QmlHttpRequest* create(QQmlEngine* qmlEngine, QJSEngine* jsEngine);
 #endif
 
-    QmlHttpRequest() = default;
+    QmlHttpRequest(QNetworkAccessManager* nam);
 
     Q_INVOKABLE qhr::Request* newRequest();
     Q_INVOKABLE void setDefaultTimeout(int timeout);

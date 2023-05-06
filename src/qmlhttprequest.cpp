@@ -17,8 +17,7 @@ void QmlHttpRequest::registerQmlHttpRequest()
         PROJECT_VERSION_MAJOR, PROJECT_VERSION_MINOR, "QmlHttpRequest",
         [](QQmlEngine* engine, QJSEngine* script) -> QmlHttpRequest* {
             if (auto engineNam = engine->networkAccessManager()) {
-                auto instance = new QmlHttpRequest;
-                instance->setNetworkAccessManager(engineNam);
+                auto instance = new QmlHttpRequest(engineNam);
 
                 QQmlEngine::setObjectOwnership(
                     instance, QQmlEngine::JavaScriptOwnership);
@@ -35,11 +34,21 @@ void QmlHttpRequest::registerQmlHttpRequest()
 QmlHttpRequest* QmlHttpRequest::create(
     QQmlEngine* qmlEngine, QJSEngine* jsEngine)
 {
-    auto instance = &QmlHttpRequest::singleton();
-    QJSEngine::setObjectOwnership(instance, QJSEngine::CppOwnership);
-    return instance;
+    if (auto engineNam = qmlEngine->networkAccessManager()) {
+        auto instance = new QmlHttpRequest(engineNam);
+
+        QQmlEngine::setObjectOwnership(
+            instance, QQmlEngine::JavaScriptOwnership);
+        return instance;
+    }
+    return nullptr;
 }
 #endif
+
+QmlHttpRequest::QmlHttpRequest(QNetworkAccessManager* nam)
+    : QObject { nullptr }, mNam { nam }
+{
+}
 
 /*!
  * \brief QmlHttpRequest::newRequest() Creates a new \ref Request object that
