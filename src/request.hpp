@@ -61,8 +61,6 @@ class QHR_EXPORT Request : public QObject
     Q_PROPERTY(QJSValue ontimeout           MEMBER  mTimeoutCb)
     Q_PROPERTY(QJSValue onerror             MEMBER  mErrorCb)
 
-    using QNetworkAccessManagerPtr = QSharedPointer<QNetworkAccessManager>;
-
 public:
     enum class Method : char
     {
@@ -86,7 +84,7 @@ public:
     };
     Q_ENUM(State);
 
-    Request(QNetworkAccessManagerPtr nam, int timeout = 0);
+    Request(QNetworkAccessManager* nam, int timeout = 0);
     virtual ~Request();
 
     Q_INVOKABLE void open(const QString& method, const QUrl& url);
@@ -99,7 +97,7 @@ public:
 
     QByteArray requestHeader(const QByteArray& header) const;
 
-    void setNetworkAccessManager(QNetworkAccessManagerPtr nam);
+    void setNetworkAccessManager(QNetworkAccessManager* nam);
     auto networkAccessManager() const { return mNam; }
 
     void setTimeout(int timeout);
@@ -142,7 +140,7 @@ private:
     void onReplyUploadProgress(qint64 bytesSent, qint64 bytesTotal);
 
 private:
-    QNetworkAccessManagerPtr mNam;
+    QNetworkAccessManager* mNam;
     QNetworkRequest mNRequest;
     QNetworkReply* mNReply;
     QByteArray mMethodName;

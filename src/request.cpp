@@ -26,7 +26,7 @@ namespace qhr {
  * \param timeout
  * \param parent
  */
-Request::Request(QNetworkAccessManagerPtr nam, int timeout)
+Request::Request(QNetworkAccessManager* nam, int timeout)
     : mNam(nam), mMethodName(""), mMethod(Method::INVALID), mNReply(nullptr)
 {
     if (timeout != 0) {
@@ -48,6 +48,12 @@ Request::~Request()
  */
 void Request::open(const QString& method, const QUrl& url)
 {
+    if (!mNam) {
+        qCritical("Request can not be opened. Network Access Manager is NULL. "
+                  "Make sure QmlHttpRequest is instanced correctly.");
+        return;
+    }
+
     mMethodName = method.toUtf8();
     if (mMethodName == "") {
         mMethod = Method::INVALID;
@@ -98,14 +104,18 @@ void Request::send(const QVariant& body)
         abort();
     }
 
-    mNRequest.setAttribute(QNetworkRequest::RedirectPolicyAttribute,
-                           QNetworkRequest::ManualRedirectPolicy);
-    mNRequest.setUrl(mUrl);
-    mNRequest.setMaximumRedirectsAllowed(15);
+    if (!isOpen()) {
+        qCritical("Request should be opened first by calling 'open()' method.");
+        return;
+    }
 
-    mBody = body;
+    if (mNam) {
+        mNRequest.setAttribute(QNetworkRequest::RedirectPolicyAttribute,
+            QNetworkRequest::ManualRedirectPolicy);
+        mNRequest.setUrl(mUrl);
+        mNRequest.setMaximumRedirectsAllowed(15);
 
-    if (isOpen() && mNam) {
+        mBody = body;
         switch (mMethod) {
         case Method::INVALID:
             return;
@@ -167,7 +177,7 @@ QByteArray Request::requestHeader(const QByteArray& header) const
  * \brief Set interanl network access manager to \a nam
  * \param nam
  */
-void Request::setNetworkAccessManager(QNetworkAccessManagerPtr nam)
+void Request::setNetworkAccessManager(QNetworkAccessManager* nam)
 {
     mNam = nam;
 }
