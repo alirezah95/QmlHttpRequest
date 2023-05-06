@@ -11,37 +11,44 @@ namespace qhr {
  * can be used in QML to create a new \ref Request
  */
 
+#if QT_VERSION_MAJOR == 5
 void QmlHttpRequest::registerQmlHttpRequest()
 {
-    qmlRegisterSingletonInstance(PROJECT_NAME, PROJECT_VERSION_MAJOR,
-        PROJECT_VERSION_MINOR, "QmlHttpRequest", &QmlHttpRequest::singleton());
+    qmlRegisterSingletonType<QmlHttpRequest>(PROJECT_NAME,
+        PROJECT_VERSION_MAJOR, PROJECT_VERSION_MINOR, "QmlHttpRequest",
+        [](QQmlEngine* engine, QJSEngine* script) -> QmlHttpRequest* {
+            if (auto engineNam = engine->networkAccessManager()) {
+                auto instance = new QmlHttpRequest(engineNam);
+
+                QQmlEngine::setObjectOwnership(
+                    instance, QQmlEngine::JavaScriptOwnership);
+                return instance;
+            }
+            return nullptr;
+        });
     qmlRegisterUncreatableType<qhr::Request>("QmlHttpRequest",
         PROJECT_VERSION_MAJOR, PROJECT_VERSION_MINOR, "Request",
         "Request can not be created from QML");
 }
-
-/*!
- * \brief Returns the singleton instance of \ref QmlHttpRequest
- * \return
- */
-QmlHttpRequest& QmlHttpRequest::singleton()
-{
-    static QmlHttpRequest qhr;
-    return qhr;
-}
+#endif
 
 #if QT_VERSION_MAJOR == 6
 QmlHttpRequest* QmlHttpRequest::create(
     QQmlEngine* qmlEngine, QJSEngine* jsEngine)
 {
-    auto instance = &QmlHttpRequest::singleton();
-    QJSEngine::setObjectOwnership(instance, QJSEngine::CppOwnership);
-    return instance;
+    if (auto engineNam = qmlEngine->networkAccessManager()) {
+        auto instance = new QmlHttpRequest(engineNam);
+
+        QQmlEngine::setObjectOwnership(
+            instance, QQmlEngine::JavaScriptOwnership);
+        return instance;
+    }
+    return nullptr;
 }
 #endif
 
-QmlHttpRequest::QmlHttpRequest(QObject* parent)
-    : QObject { parent }, mNam(new QNetworkAccessManager())
+QmlHttpRequest::QmlHttpRequest(QNetworkAccessManager* nam)
+    : QObject { nullptr }, mNam { nam }
 {
 }
 
@@ -65,6 +72,16 @@ Request* QmlHttpRequest::newRequest()
 void QmlHttpRequest::setDefaultTimeout(int timeout)
 {
     mNam->setTransferTimeout(timeout);
+}
+
+void QmlHttpRequest::setNetworkAccessManager(QNetworkAccessManager *nam)
+{
+    mNam = nam;
+}
+
+QNetworkAccessManager *QmlHttpRequest::networkAccessManager() const
+{
+    return mNam;
 }
 
 /*!
