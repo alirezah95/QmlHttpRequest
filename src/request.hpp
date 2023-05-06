@@ -42,6 +42,7 @@ class QHR_EXPORT Request : public QObject
 {
     Q_OBJECT
     QML_ELEMENT
+    QML_UNCREATABLE("Request can not be created from QML")
     // Response properties
     Q_PROPERTY(QVariant response        READ response       CONSTANT)
     Q_PROPERTY(QString  responseText    READ responseText   CONSTANT)
