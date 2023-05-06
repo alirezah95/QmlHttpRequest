@@ -61,7 +61,9 @@ public:
     Q_ENUM(State);
 
 public:
+#if QT_VERSION_MAJOR == 5
     static void registerQmlHttpRequest();
+#endif
 
 #if QT_VERSION_MAJOR == 6
     static QmlHttpRequest* create(QQmlEngine* qmlEngine, QJSEngine* jsEngine);

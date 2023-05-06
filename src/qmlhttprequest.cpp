@@ -11,6 +11,7 @@ namespace qhr {
  * can be used in QML to create a new \ref Request
  */
 
+#if QT_VERSION_MAJOR == 5
 void QmlHttpRequest::registerQmlHttpRequest()
 {
     qmlRegisterSingletonType<QmlHttpRequest>(PROJECT_NAME,
@@ -29,6 +30,7 @@ void QmlHttpRequest::registerQmlHttpRequest()
         PROJECT_VERSION_MAJOR, PROJECT_VERSION_MINOR, "Request",
         "Request can not be created from QML");
 }
+#endif
 
 #if QT_VERSION_MAJOR == 6
 QmlHttpRequest* QmlHttpRequest::create(
