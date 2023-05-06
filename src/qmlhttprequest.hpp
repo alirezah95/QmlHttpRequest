@@ -40,8 +40,6 @@ class QmlHttpRequest : public QObject
     Q_PROPERTY(RedirectPolicy redirectPolicy READ redirectPolicy WRITE
             setRedirectPolicy)
 
-    using QNetworkAccessManagerPtr = QSharedPointer<QNetworkAccessManager>;
-
 public:
     enum RedirectPolicy
     {
@@ -65,26 +63,23 @@ public:
 public:
     static void registerQmlHttpRequest();
 
-    static QmlHttpRequest& singleton();
 #if QT_VERSION_MAJOR == 6
     static QmlHttpRequest* create(QQmlEngine* qmlEngine, QJSEngine* jsEngine);
 #endif
 
+    QmlHttpRequest() = default;
+
     Q_INVOKABLE qhr::Request* newRequest();
     Q_INVOKABLE void setDefaultTimeout(int timeout);
+
+    void setNetworkAccessManager(QNetworkAccessManager* nam);
+    QNetworkAccessManager* networkAccessManager() const;
 
     void setRedirectPolicy(RedirectPolicy rp);
     RedirectPolicy redirectPolicy() const;
 
-#ifdef QHR_TEST
-protected:
-#else
 private:
-#endif
-    explicit QmlHttpRequest(QObject* parent = nullptr);
-
-private:
-    QNetworkAccessManagerPtr mNam;
+    QNetworkAccessManager* mNam;
 };
 
 }

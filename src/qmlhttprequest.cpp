@@ -13,21 +13,22 @@ namespace qhr {
 
 void QmlHttpRequest::registerQmlHttpRequest()
 {
-    qmlRegisterSingletonInstance(PROJECT_NAME, PROJECT_VERSION_MAJOR,
-        PROJECT_VERSION_MINOR, "QmlHttpRequest", &QmlHttpRequest::singleton());
+    qmlRegisterSingletonType<QmlHttpRequest>(PROJECT_NAME,
+        PROJECT_VERSION_MAJOR, PROJECT_VERSION_MINOR, "QmlHttpRequest",
+        [](QQmlEngine* engine, QJSEngine* script) -> QmlHttpRequest* {
+            if (auto engineNam = engine->networkAccessManager()) {
+                auto instance = new QmlHttpRequest;
+                instance->setNetworkAccessManager(engineNam);
+
+                QQmlEngine::setObjectOwnership(
+                    instance, QQmlEngine::JavaScriptOwnership);
+                return instance;
+            }
+            return nullptr;
+        });
     qmlRegisterUncreatableType<qhr::Request>("QmlHttpRequest",
         PROJECT_VERSION_MAJOR, PROJECT_VERSION_MINOR, "Request",
         "Request can not be created from QML");
-}
-
-/*!
- * \brief Returns the singleton instance of \ref QmlHttpRequest
- * \return
- */
-QmlHttpRequest& QmlHttpRequest::singleton()
-{
-    static QmlHttpRequest qhr;
-    return qhr;
 }
 
 #if QT_VERSION_MAJOR == 6
@@ -39,11 +40,6 @@ QmlHttpRequest* QmlHttpRequest::create(
     return instance;
 }
 #endif
-
-QmlHttpRequest::QmlHttpRequest(QObject* parent)
-    : QObject { parent }, mNam(new QNetworkAccessManager())
-{
-}
 
 /*!
  * \brief QmlHttpRequest::newRequest() Creates a new \ref Request object that
@@ -65,6 +61,16 @@ Request* QmlHttpRequest::newRequest()
 void QmlHttpRequest::setDefaultTimeout(int timeout)
 {
     mNam->setTransferTimeout(timeout);
+}
+
+void QmlHttpRequest::setNetworkAccessManager(QNetworkAccessManager *nam)
+{
+    mNam = nam;
+}
+
+QNetworkAccessManager *QmlHttpRequest::networkAccessManager() const
+{
+    return mNam;
 }
 
 /*!
