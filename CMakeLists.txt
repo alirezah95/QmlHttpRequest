@@ -18,7 +18,7 @@ endif()
 set(PROJECT_VERSION_TYPE "alpha")
 set(PROJECT_LICENSE_TYPE "MIT")
 set(PROJECT_CREATOR "Alireza")
-set(PROJECT_LANGUAGES "C++ QML")
+set(PROJECT_LANGUAGES "CXX")
 set(PROJECT_DESCRIPTION "A XmlHttpRequest like module for QML providing more HTTP functionality like timeout, upload and download files, etc")
 set(PROJECT_HOMEPAGE_URL "https://github.com/alirezah95/QmlHttpRequest")
 
@@ -36,6 +36,8 @@ include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}/src
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
+
+find_package(QT NAMES Qt6 Qt5)
 
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_add_qml_module(${PROJECT_NAME}
