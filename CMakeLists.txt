@@ -5,12 +5,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
-# Store parent project name before setting project information
-set(PARENT_PROJECT_NAME "${PROJECT_NAME}")
-
 set(PROJECT_NAME "QmlHttpRequest")
 set(PROJECT_VERSION_MAJOR 1)
-set(PROJECT_VERSION_MINOR 0)
+set(PROJECT_VERSION_MINOR 1)
 set(PROJECT_VERSION_PATCH 0)
 set(PROJECT_VERSION_TWEAK 0)
 if (PROJECT_VERSION_TWEAK EQUAL 0)
@@ -21,7 +18,7 @@ endif()
 set(PROJECT_VERSION_TYPE "alpha")
 set(PROJECT_LICENSE_TYPE "MIT")
 set(PROJECT_CREATOR "Alireza")
-set(PROJECT_LANGUAGES "C++ QML")
+set(PROJECT_LANGUAGES "CXX")
 set(PROJECT_DESCRIPTION "A XmlHttpRequest like module for QML providing more HTTP functionality like timeout, upload and download files, etc")
 set(PROJECT_HOMEPAGE_URL "https://github.com/alirezah95/QmlHttpRequest")
 
@@ -29,7 +26,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.hpp.in
     ${CMAKE_CURRENT_BINARY_DIR}/src/config.hpp
 )
 
-set(ENABLE_TESTING
+set(QHR_ENABLE_TESTING
     ON
     CACHE BOOL "Enable unit testing. Note that Google test library must be
     installed on properly configrued on your sysytem"
@@ -40,12 +37,12 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
+find_package(QT NAMES Qt6 Qt5)
+
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_add_qml_module(${PROJECT_NAME}
         URI "QmlHttpRequest"
         SHARED
-        OUTPUT_DIRECTORY
-            ${CMAKE_BINARY_DIR}/QmlHttpRequest
         VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
         SOURCES
             src/qmlhttprequest_global.hpp
@@ -55,16 +52,8 @@ if(QT_VERSION_MAJOR EQUAL 6)
         )
 
     target_compile_definitions(QmlHttpRequest PRIVATE QMLHTTPREQUEST_LIBRARY)
-
-    target_link_directories(${PARENT_PROJECT_NAME} PRIVATE
-        ${CMAKE_CURRENT_BINARY_DIR}
-        ${CMAKE_BINARY_DIR}/QmlHttpRequest
-    )
-    target_link_libraries(${PARENT_PROJECT_NAME} PRIVATE
-        ${PROJECT_NAME}
-    )
 else()
-    project(${PROJECT_NAME} VERSION ${PROJECT_VERSION} LANGUAGES CXX)
+    project(${PROJECT_NAME} VERSION ${PROJECT_VERSION} LANGUAGES ${PROJECT_LANGUAGES})
 
     find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Network Qml)
 
@@ -82,13 +71,9 @@ else()
         Qt${QT_VERSION_MAJOR}::Network
         Qt${QT_VERSION_MAJOR}::Qml
     )
-
-    target_link_libraries(${PARENT_PROJECT_NAME} PRIVATE
-        ${PROJECT_NAME}
-    )
 endif()
 
-if (ENABLE_TESTING)
+if (QHR_ENABLE_TESTING)
     # Add tests subdirectory
     add_subdirectory("tests/")
 endif()
